@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { chunk, noteSent, RECENT_SENT_CAP } from '../src/adapters/discord/utils.js'
+import type { Attachment } from 'discord.js'
+import { chunk, safeAttName, noteSent, RECENT_SENT_CAP } from '../src/adapters/discord/utils.js'
 
 describe('chunk()', () => {
   it('returns single-element array when text fits within limit', () => {
@@ -62,6 +63,28 @@ describe('chunk()', () => {
 
   it('handles empty string', () => {
     expect(chunk('', 10, 'length')).toEqual([''])
+  })
+})
+
+describe('safeAttName()', () => {
+  function fakeAtt(name: string | null, id = 'fallback-id'): Attachment {
+    return { name, id } as unknown as Attachment
+  }
+
+  it('returns name as-is when clean', () => {
+    expect(safeAttName(fakeAtt('photo.png'))).toBe('photo.png')
+  })
+
+  it('replaces brackets', () => {
+    expect(safeAttName(fakeAtt('file[1].txt'))).toBe('file_1_.txt')
+  })
+
+  it('replaces newlines and semicolons', () => {
+    expect(safeAttName(fakeAtt('a\r\nb;c.txt'))).toBe('a__b_c.txt')
+  })
+
+  it('falls back to id when name is null', () => {
+    expect(safeAttName(fakeAtt(null, '123456'))).toBe('123456')
   })
 })
 

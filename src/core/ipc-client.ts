@@ -7,7 +7,7 @@ import type {
   ToolResultMsg,
 } from './types.js'
 
-const REQUEST_TIMEOUT_MS = 30_000
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30_000
 
 type PendingRequest = {
   resolve: (msg: DaemonMessage) => void
@@ -16,13 +16,18 @@ type PendingRequest = {
 }
 
 export class IpcClient {
+  private sockPath: string
   private socket: net.Socket | null = null
   private pending = new Map<string, PendingRequest>()
   private messageHandler: ((msg: InboundMsg) => void) | null = null
   private shutdownHandler: (() => void) | null = null
   private buffer = ''
+  private timeoutMs: number
 
-  constructor(private sockPath: string) {}
+  constructor(sockPath: string, opts?: { timeoutMs?: number }) {
+    this.sockPath = sockPath
+    this.timeoutMs = opts?.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS
+  }
 
   connect(): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -145,8 +150,8 @@ export class IpcClient {
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         this.pending.delete(id)
-        reject(new Error(`request ${id} timed out after ${REQUEST_TIMEOUT_MS}ms`))
-      }, REQUEST_TIMEOUT_MS)
+        reject(new Error(`request ${id} timed out after ${this.timeoutMs}ms`))
+      }, this.timeoutMs)
 
       this.pending.set(id, { resolve, reject, timer })
     })

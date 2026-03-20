@@ -22,8 +22,8 @@ describe('IPC server/client', () => {
     rmSync(testDir, { recursive: true, force: true })
   })
 
-  async function createClient(): Promise<IpcClient> {
-    const client = new IpcClient(sockPath)
+  async function createClient(opts?: { timeoutMs?: number }): Promise<IpcClient> {
+    const client = new IpcClient(sockPath, opts)
     await client.connect()
     return client
   }
@@ -203,6 +203,25 @@ describe('IPC server/client', () => {
 
     const ack2 = await client.register('session-1', ['ch-500'], false)
     expect(ack2.ok).toBe(true)
+
+    client.disconnect('session-1')
+  })
+
+  it('times out pending requests', async () => {
+    // Set a handler that never resolves
+    server.onToolCall(() => new Promise(() => {}))
+
+    const client = await createClient({ timeoutMs: 200 })
+    await client.register('session-1', [], false)
+
+    const start = Date.now()
+    await expect(
+      client.toolCall('session-1', 'reply', { text: 'hello' }),
+    ).rejects.toThrow('timed out')
+    const elapsed = Date.now() - start
+
+    expect(elapsed).toBeGreaterThanOrEqual(150)
+    expect(elapsed).toBeLessThan(1000)
 
     client.disconnect('session-1')
   })
