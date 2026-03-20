@@ -12,10 +12,10 @@ export const APPROVED_DIR = join(STATE_DIR, 'approved')
 
 const ENV_LINE = /^(\w+)=(.*)$/
 
-export function loadEnvFile(): void {
+export function loadEnvFile(path: string = ENV_FILE): void {
   let content: string
   try {
-    content = readFileSync(ENV_FILE, 'utf8')
+    content = readFileSync(path, 'utf8')
   } catch {
     return
   }
