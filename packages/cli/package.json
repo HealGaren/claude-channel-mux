@@ -13,12 +13,20 @@
     "url": "https://github.com/HealGaren/claude-channel-mux.git",
     "directory": "packages/cli"
   },
-  "keywords": ["claude", "claude-code", "cli"],
-  "engines": { "node": ">=20" },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "cli"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "bin": {
     "channel-mux": "./dist/cli.mjs"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsdown",
     "typecheck": "tsc --noEmit"

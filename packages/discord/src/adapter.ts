@@ -1,27 +1,27 @@
-import {
-  Client,
-  GatewayIntentBits,
-  Partials,
-  ChannelType,
-  type Message,
-  type TextChannel,
-  type DMChannel,
-  type ThreadChannel,
-  AttachmentBuilder,
-} from 'discord.js'
-import { mkdirSync, writeFileSync, readFileSync, statSync } from 'node:fs'
+import { mkdirSync, statSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import type { PlatformAdapter, InboundMsg, GateResult } from '@claude-channel-mux/core'
+import type { GateResult, InboundMsg, PlatformAdapter } from '@claude-channel-mux/core'
 import { INBOX_DIR } from '@claude-channel-mux/core'
-import { gate as gateCheck, readAccessFile, checkApprovals } from './access.js'
 import {
-  chunk,
+  AttachmentBuilder,
+  ChannelType,
+  Client,
+  type DMChannel,
+  GatewayIntentBits,
+  type Message,
+  Partials,
+  type TextChannel,
+  type ThreadChannel,
+} from 'discord.js'
+import { checkApprovals, gate as gateCheck, readAccessFile } from './access.js'
+import {
   assertSendable,
-  safeAttName,
-  noteSent,
-  MAX_CHUNK_LIMIT,
+  chunk,
   MAX_ATTACHMENT_BYTES,
   MAX_ATTACHMENT_COUNT,
+  MAX_CHUNK_LIMIT,
+  noteSent,
+  safeAttName,
 } from './utils.js'
 
 type SendableChannel = TextChannel | DMChannel | ThreadChannel
@@ -63,9 +63,7 @@ export class DiscordAdapter implements PlatformAdapter {
       checkApprovals((id) => this.fetchTextChannel(id))
     }, 5000)
 
-    process.stderr.write(
-      `channel-mux discord: logged in as ${this.client.user?.tag}\n`,
-    )
+    process.stderr.write(`channel-mux discord: logged in as ${this.client.user?.tag}\n`)
   }
 
   async disconnect(): Promise<void> {
@@ -111,9 +109,7 @@ export class DiscordAdapter implements PlatformAdapter {
     const sentIds: string[] = []
     for (let i = 0; i < chunks.length; i++) {
       const shouldReplyTo =
-        args.reply_to != null &&
-        replyMode !== 'off' &&
-        (replyMode === 'all' || i === 0)
+        args.reply_to != null && replyMode !== 'off' && (replyMode === 'all' || i === 0)
 
       const sent = await ch.send({
         content: chunks[i],
@@ -129,11 +125,7 @@ export class DiscordAdapter implements PlatformAdapter {
     return { sentIds }
   }
 
-  async react(args: {
-    chat_id: string
-    message_id: string
-    emoji: string
-  }): Promise<void> {
+  async react(args: { chat_id: string; message_id: string; emoji: string }): Promise<void> {
     const ch = await this.fetchAllowedChannel(args.chat_id)
     const msg = await ch.messages.fetch(args.message_id)
     await msg.react(args.emoji)
@@ -153,10 +145,7 @@ export class DiscordAdapter implements PlatformAdapter {
     return { editedId: msg.id }
   }
 
-  async fetchMessages(args: {
-    channel: string
-    limit?: number
-  }): Promise<string> {
+  async fetchMessages(args: { channel: string; limit?: number }): Promise<string> {
     const ch = await this.fetchAllowedChannel(args.channel)
     const limit = Math.min(args.limit ?? 20, 100)
     const messages = await ch.messages.fetch({ limit })
@@ -166,9 +155,7 @@ export class DiscordAdapter implements PlatformAdapter {
       .map(
         (m) =>
           `[${m.createdAt.toISOString()}] ${m.author.username}: ${m.content}` +
-          (m.attachments.size > 0
-            ? ` [${m.attachments.size} attachment(s)]`
-            : ''),
+          (m.attachments.size > 0 ? ` [${m.attachments.size} attachment(s)]` : ''),
       )
 
     return lines.join('\n')
@@ -308,7 +295,7 @@ export class DiscordAdapter implements PlatformAdapter {
       const recipientId = ch.recipientId
       if (recipientId && access.allowFrom.includes(recipientId)) return ch
     } else {
-      const key = ch.isThread() ? (ch as ThreadChannel).parentId ?? ch.id : ch.id
+      const key = ch.isThread() ? ((ch as ThreadChannel).parentId ?? ch.id) : ch.id
       if (key in access.groups) return ch
     }
 

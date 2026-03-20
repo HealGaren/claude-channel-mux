@@ -1,6 +1,6 @@
 import { realpathSync } from 'node:fs'
 import { join, sep } from 'node:path'
-import { STATE_DIR, INBOX_DIR } from '@claude-channel-mux/core'
+import { STATE_DIR } from '@claude-channel-mux/core'
 import type { Attachment } from 'discord.js'
 
 export const MAX_CHUNK_LIMIT = 2000
@@ -42,7 +42,7 @@ export function assertSendable(f: string): void {
 }
 
 export function safeAttName(att: Attachment): string {
-  return (att.name ?? att.id).replace(/[\[\]\r\n;]/g, '_')
+  return (att.name ?? att.id).replace(/[[\]\r\n;]/g, '_')
 }
 
 export function noteSent(recentSentIds: Set<string>, id: string): void {

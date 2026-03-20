@@ -1,3 +1,3 @@
+export { pruneExpired, readAccessFile, saveAccess } from './access.js'
 export { DiscordAdapter } from './adapter.js'
-export { readAccessFile, saveAccess, pruneExpired } from './access.js'
-export { chunk, assertSendable, safeAttName, noteSent } from './utils.js'
+export { assertSendable, chunk, noteSent, safeAttName } from './utils.js'

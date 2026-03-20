@@ -1,6 +1,6 @@
-import { mkdirSync, writeFileSync, unlinkSync } from 'node:fs'
+import { mkdirSync, unlinkSync, writeFileSync } from 'node:fs'
+import { IpcServer, loadEnvFile, PID_FILE, SOCK_PATH, STATE_DIR } from '@claude-channel-mux/core'
 import { DiscordAdapter } from './adapter.js'
-import { IpcServer, loadEnvFile, SOCK_PATH, PID_FILE, STATE_DIR } from '@claude-channel-mux/core'
 
 async function main() {
   loadEnvFile()
@@ -37,7 +37,9 @@ async function main() {
       case 'edit_message':
         return adapter.editMessage(args as Parameters<typeof adapter.editMessage>[0])
       case 'fetch_messages': {
-        const result = await adapter.fetchMessages(args as Parameters<typeof adapter.fetchMessages>[0])
+        const result = await adapter.fetchMessages(
+          args as Parameters<typeof adapter.fetchMessages>[0],
+        )
         return { result }
       }
       case 'download_attachment':
@@ -55,8 +57,12 @@ async function main() {
     ipc.broadcastShutdown()
     ipc.stop()
     adapter.disconnect()
-    try { unlinkSync(PID_FILE) } catch {}
-    try { unlinkSync(SOCK_PATH) } catch {}
+    try {
+      unlinkSync(PID_FILE)
+    } catch {}
+    try {
+      unlinkSync(SOCK_PATH)
+    } catch {}
     process.exit(0)
   }
   process.on('SIGTERM', shutdown)
