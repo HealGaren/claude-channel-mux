@@ -1,6 +1,6 @@
 {
   "name": "@claude-channel-mux/core",
-  "version": "0.1.0",
+  "version": "0.1.0-alpha.0",
   "description": "Core IPC, types, and gate logic for claude-channel-mux",
   "type": "module",
   "license": "MIT",
