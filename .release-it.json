@@ -8,8 +8,7 @@
     "publish": false
   },
   "github": {
-    "release": true,
-    "releaseName": "v${version}"
+    "release": false
   },
   "hooks": {
     "before:init": ["pnpm run build", "pnpm run typecheck", "pnpm test"],
