@@ -20,6 +20,7 @@
     "build": "pnpm -r run build",
     "typecheck": "pnpm --filter @claude-channel-mux/core run build && pnpm -r run typecheck",
     "test": "pnpm -r run test",
+    "test:smoke": "vitest run",
     "dev": "pnpm --filter @claude-channel-mux/discord run dev",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
