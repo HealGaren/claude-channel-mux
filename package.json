@@ -2,6 +2,25 @@
   "name": "claude-channel-mux",
   "version": "0.1.0",
   "type": "module",
+  "files": [
+    "dist",
+    "skills",
+    ".claude-plugin"
+  ],
+  "exports": {
+    "./types": {
+      "import": "./dist/types.mjs",
+      "types": "./dist/types.d.mts"
+    },
+    "./ipc": {
+      "import": "./dist/ipc.mjs",
+      "types": "./dist/ipc.d.mts"
+    },
+    "./adapters/discord": {
+      "import": "./dist/adapters-discord.mjs",
+      "types": "./dist/adapters-discord.d.mts"
+    }
+  },
   "bin": {
     "channel-mux": "./dist/cli.mjs",
     "channel-mux-plugin": "./dist/plugin.mjs"
