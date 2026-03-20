@@ -43,5 +43,5 @@ jobs:
           for pkg in packages/core packages/discord packages/cli; do
             echo "Publishing $pkg..."
             cd "$GITHUB_WORKSPACE/$pkg"
-            npm publish --tag "$TAG" --access public
+            pnpm publish --tag "$TAG" --access public --no-git-checks
           done
