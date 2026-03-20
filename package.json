@@ -1,5 +1,6 @@
 {
   "name": "claude-channel-mux-root",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "description": "Multiplex Claude Code channel sessions through a single Discord bot",
@@ -26,8 +27,8 @@
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
-    "release": "pnpm -r exec release-it --no-git --no-github --no-npm && release-it",
-    "release:alpha": "pnpm -r exec release-it --no-git --no-github --no-npm --preRelease=alpha && release-it --preRelease=alpha"
+    "release": "release-it",
+    "release:alpha": "release-it --preRelease=alpha"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.8",
