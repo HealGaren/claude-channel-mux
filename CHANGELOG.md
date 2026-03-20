@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.1.0-alpha.2](https://github.com/HealGaren/claude-channel-mux/compare/v0.1.0-alpha.1...v0.1.0-alpha.2) (2026-03-20)
+
+
+### Bug Fixes
+
+* use pnpm publish to resolve workspace:* protocol ([#49](https://github.com/HealGaren/claude-channel-mux/issues/49)) ([ce3d979](https://github.com/HealGaren/claude-channel-mux/commit/ce3d979438f3afa23d665eab71f80aada6452d6b))
+
 # 0.1.0-alpha.1 (2026-03-20)
 
 
