@@ -21,10 +21,14 @@
     "typecheck": "pnpm --filter @claude-channel-mux/core run build && pnpm -r run typecheck",
     "test": "pnpm -r run test",
     "dev": "pnpm --filter @claude-channel-mux/discord run dev",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
     "release": "pnpm -r exec release-it --no-git --no-github --no-npm && release-it",
     "release:alpha": "pnpm -r exec release-it --no-git --no-github --no-npm --preRelease=alpha && release-it --preRelease=alpha"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.8",
     "@release-it/conventional-changelog": "^10.0.6",
     "@types/node": "^20.0.0",
     "release-it": "^19.2.4",
