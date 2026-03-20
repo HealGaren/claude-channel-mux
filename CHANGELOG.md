@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.1.0-alpha.3](https://github.com/HealGaren/claude-channel-mux/compare/v0.1.0-alpha.2...v0.1.0-alpha.3) (2026-03-20)
+
+
+### Bug Fixes
+
+* add shebang to bin entrypoints for direct execution ([#56](https://github.com/HealGaren/claude-channel-mux/issues/56)) ([ac90a62](https://github.com/HealGaren/claude-channel-mux/commit/ac90a6203ff55d59a595e9152d525a2f6f244e3d))
+
 # [0.1.0-alpha.2](https://github.com/HealGaren/claude-channel-mux/compare/v0.1.0-alpha.1...v0.1.0-alpha.2) (2026-03-20)
 
 

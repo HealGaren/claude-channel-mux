@@ -1,6 +1,6 @@
 {
   "name": "@claude-channel-mux/cli",
-  "version": "0.1.0-alpha.2",
+  "version": "0.1.0-alpha.3",
   "description": "CLI for claude-channel-mux daemon management",
   "type": "module",
   "license": "MIT",
