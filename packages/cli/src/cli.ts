@@ -38,12 +38,18 @@ function resolveDaemonCommand(): { runner: string; args: string[] } {
     // Not on PATH -- fall back to dev mode (tsx + source)
   }
 
-  // Dev mode: resolve the discord package source via import.meta
+  // Resolve daemon from the discord package
   try {
     const discordPkg = import.meta.resolve('@claude-channel-mux/discord')
-    // discordPkg points to the package entry (e.g. .../dist/index.mjs or .../src/index.ts)
-    // We need the daemon source which sits next to it
     const discordDir = new URL('.', discordPkg).pathname
+
+    // Production: built daemon.mjs in dist/
+    const builtDaemon = join(discordDir, 'daemon.mjs')
+    if (existsSync(builtDaemon)) {
+      return { runner: process.execPath, args: [builtDaemon] }
+    }
+
+    // Dev: source daemon.ts via tsx
     const srcDaemon = join(discordDir, '..', 'src', 'daemon.ts')
     if (existsSync(srcDaemon)) {
       const tsx = execSync('which tsx', { encoding: 'utf8' }).trim()
