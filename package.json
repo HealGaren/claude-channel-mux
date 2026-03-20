@@ -54,7 +54,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "prepublishOnly": "pnpm run build"
+    "prepublishOnly": "pnpm run build",
+    "release": "release-it",
+    "release:alpha": "release-it --preRelease=alpha --npm.tag=alpha"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
@@ -62,6 +64,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "release-it": "^19.2.4",
     "tsdown": "^0.21.4",
     "tsx": "^4.0.0",
     "typescript": "^5.5.0",
