@@ -1,4 +1,4 @@
-import { readFileSync, existsSync, unlinkSync } from 'node:fs'
+import { readFileSync, existsSync, unlinkSync, openSync, mkdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawn, execSync } from 'node:child_process'
@@ -52,8 +52,11 @@ switch (command) {
       process.exit(1)
     }
 
+    mkdirSync(STATE_DIR, { recursive: true })
+    const logFd = openSync(logPath, 'a')
+
     const child = spawn(tsxBin, [daemonPath], {
-      stdio: ['ignore', 'ignore', 'ignore'],
+      stdio: ['ignore', logFd, logFd],
       detached: true,
       env: { ...process.env },
     })
