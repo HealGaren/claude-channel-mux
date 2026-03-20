@@ -1,4 +1,4 @@
-import { readFileSync, existsSync, unlinkSync, openSync, mkdirSync } from 'node:fs'
+import { readFileSync, existsSync, unlinkSync, openSync, closeSync, mkdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawn, execSync } from 'node:child_process'
@@ -53,14 +53,21 @@ switch (command) {
     }
 
     mkdirSync(STATE_DIR, { recursive: true })
-    const logFd = openSync(logPath, 'a')
+    let logFd: number
+    try {
+      logFd = openSync(logPath, 'a')
+    } catch {
+      console.error(`channel-mux: cannot open log file: ${logPath}`)
+      process.exit(1)
+    }
 
     const child = spawn(tsxBin, [daemonPath], {
-      stdio: ['ignore', logFd, logFd],
+      stdio: ['ignore', 'ignore', logFd],
       detached: true,
       env: { ...process.env },
     })
     child.unref()
+    closeSync(logFd)
 
     // Wait briefly for PID file
     await new Promise((r) => setTimeout(r, 2000))
