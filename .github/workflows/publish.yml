@@ -34,5 +34,11 @@ jobs:
           else
             echo "npm_tag=latest" >> "$GITHUB_OUTPUT"
           fi
-      - name: Publish all packages
-        run: pnpm -r publish --tag ${{ steps.tag.outputs.npm_tag }} --access public --no-git-checks --provenance
+      - name: Publish packages
+        run: |
+          TAG="${{ steps.tag.outputs.npm_tag }}"
+          for pkg in packages/core packages/discord packages/cli; do
+            echo "Publishing $pkg..."
+            cd "$GITHUB_WORKSPACE/$pkg"
+            npm publish --tag "$TAG" --access public --provenance
+          done
