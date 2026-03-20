@@ -22,6 +22,7 @@
     "test": "pnpm -r run test",
     "test:smoke": "vitest run",
     "dev": "pnpm --filter @claude-channel-mux/discord run dev",
+    "check": "pnpm run lint && pnpm run build && pnpm run typecheck && pnpm run test && pnpm run test:smoke",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
