@@ -40,16 +40,27 @@ switch (command) {
       try { unlinkSync(SOCK_PATH) } catch {}
     }
 
-    const daemonPath = join(__dirname, 'daemon.ts')
     const logPath = join(STATE_DIR, 'daemon.log')
 
-    // Find tsx path
-    let tsxBin: string
-    try {
-      tsxBin = execSync('which tsx', { encoding: 'utf8' }).trim()
-    } catch {
-      console.error('channel-mux: tsx not found. Install with: pnpm add -g tsx')
-      process.exit(1)
+    // Find daemon entry point: built (daemon.mjs) or source (daemon.ts)
+    const builtDaemon = join(__dirname, 'daemon.mjs')
+    const srcDaemon = join(__dirname, 'daemon.ts')
+    const useBuilt = existsSync(builtDaemon)
+    const daemonPath = useBuilt ? builtDaemon : srcDaemon
+
+    let runner: string
+    let runnerArgs: string[]
+    if (useBuilt) {
+      runner = process.execPath  // node
+      runnerArgs = [daemonPath]
+    } else {
+      try {
+        runner = execSync('which tsx', { encoding: 'utf8' }).trim()
+      } catch {
+        console.error('channel-mux: tsx not found. Install with: pnpm add -g tsx')
+        process.exit(1)
+      }
+      runnerArgs = [daemonPath]
     }
 
     mkdirSync(STATE_DIR, { recursive: true })
@@ -61,7 +72,7 @@ switch (command) {
       process.exit(1)
     }
 
-    const child = spawn(tsxBin, [daemonPath], {
+    const child = spawn(runner, runnerArgs, {
       stdio: ['ignore', 'ignore', logFd],
       detached: true,
       env: { ...process.env },
