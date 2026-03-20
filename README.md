@@ -250,9 +250,7 @@ packages/
 
 ```bash
 pnpm install
-pnpm run build        # Build all packages
-pnpm run typecheck    # Type check all packages
-pnpm run test         # Run tests across all packages
+pnpm run check        # Full pre-PR check (lint, build, typecheck, test, smoke)
 pnpm run dev          # Start daemon with watch mode
 ```
 
