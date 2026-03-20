@@ -6,6 +6,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![CI](https://github.com/HealGaren/claude-channel-mux/actions/workflows/ci.yml/badge.svg)](https://github.com/HealGaren/claude-channel-mux/actions/workflows/ci.yml)
 
+> **Note**: This is a community project and is not affiliated with or endorsed by Anthropic.
+
 ---
 
 ## What is this?
