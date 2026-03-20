@@ -8,7 +8,10 @@
     "type": "git",
     "url": "https://github.com/HealGaren/claude-channel-mux.git"
   },
-  "author": "HealGaren",
+  "author": {
+    "name": "HealGaren",
+    "url": "https://github.com/HealGaren"
+  },
   "keywords": [
     "claude",
     "claude-code",
