@@ -13,14 +13,20 @@ pnpm install
 ## Code Style
 
 - **TypeScript** strict mode, ESM (`"type": "module"`)
+- **Biome** for linting and formatting (`pnpm run lint:fix`)
 - **kebab-case** for all file and folder names
-- **pnpm** as the package manager
+- **pnpm** workspaces
 
 ## Useful Commands
 
 ```bash
-pnpm run typecheck   # Type check without emitting
-pnpm run build       # Build to dist/
+pnpm run check       # Run all checks (lint, build, typecheck, test, smoke)
+pnpm run lint        # Lint only
+pnpm run lint:fix    # Auto-fix lint issues
+pnpm run build       # Build all packages
+pnpm run typecheck   # Type check all packages
+pnpm run test        # Unit tests
+pnpm run test:smoke  # Integration smoke tests
 pnpm run dev         # Start daemon in watch mode
 ```
 
@@ -28,8 +34,8 @@ pnpm run dev         # Start daemon in watch mode
 
 1. Create a feature branch from `main`
 2. Make your changes
-3. Ensure `pnpm run typecheck` passes
-4. Submit a PR with a clear description of the change
+3. Run `pnpm run check` before pushing
+4. Submit a PR with a clear description
 
 ## Architecture
 
