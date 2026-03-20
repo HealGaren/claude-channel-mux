@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest'
 import type { Attachment } from 'discord.js'
-import { chunk, safeAttName, noteSent, RECENT_SENT_CAP } from '../src/utils.js'
+import { describe, expect, it } from 'vitest'
+import { chunk, noteSent, RECENT_SENT_CAP, safeAttName } from '../src/utils.js'
 
 describe('chunk()', () => {
   it('returns single-element array when text fits within limit', () => {
@@ -24,7 +24,7 @@ describe('chunk()', () => {
 
   describe('newline mode', () => {
     it('prefers paragraph breaks', () => {
-      const long = 'a'.repeat(6) + '\n\n' + 'b'.repeat(6) + '\n\n' + 'c'.repeat(6)
+      const long = `${'a'.repeat(6)}\n\n${'b'.repeat(6)}\n\n${'c'.repeat(6)}`
       const result = chunk(long, 15, 'newline')
       expect(result[0]).toBe('aaaaaa\n\nbbbbbb')
       expect(result[1]).toBe('cccccc')

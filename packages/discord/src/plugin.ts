@@ -1,11 +1,8 @@
 import { randomUUID } from 'node:crypto'
+import { IpcClient, SOCK_PATH } from '@claude-channel-mux/core'
 import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
-import {
-  ListToolsRequestSchema,
-  CallToolRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js'
-import { IpcClient, SOCK_PATH } from '@claude-channel-mux/core'
+import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
 
 const sessionId = randomUUID()
 
@@ -30,7 +27,7 @@ if (!ack.ok) {
   process.exit(1)
 }
 
-const botUsername = ack.botUsername ?? 'channel-mux-bot'
+const _botUsername = ack.botUsername ?? 'channel-mux-bot'
 
 const mcp = new Server(
   { name: 'channel-mux', version: '0.1.0' },

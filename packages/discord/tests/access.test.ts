@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { writeFileSync, mkdirSync, rmSync, readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import type { Access } from '@claude-channel-mux/core'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Mock config paths before importing access module
 const testDir = join(tmpdir(), `channel-mux-access-test-${process.pid}`)
@@ -20,9 +20,7 @@ vi.mock('@claude-channel-mux/core', () => ({
 }))
 
 // Import after mock
-const { readAccessFile, saveAccess, pruneExpired } = await import(
-  '../src/access.js'
-)
+const { readAccessFile, saveAccess, pruneExpired } = await import('../src/access.js')
 
 describe('access file operations', () => {
   beforeEach(() => {
@@ -63,7 +61,7 @@ describe('access file operations', () => {
     }
     saveAccess(data)
     const raw = readFileSync(accessFile, 'utf8')
-    expect(raw).toContain('  ')  // indented
+    expect(raw).toContain('  ') // indented
     const parsed = JSON.parse(raw)
     expect(parsed.allowFrom).toEqual(['user-1'])
   })
@@ -80,14 +78,14 @@ describe('pruneExpired()', () => {
           senderId: 'u1',
           chatId: 'ch1',
           createdAt: Date.now() - 7200000,
-          expiresAt: Date.now() - 3600000,  // expired 1h ago
+          expiresAt: Date.now() - 3600000, // expired 1h ago
           replies: 1,
         },
         def456: {
           senderId: 'u2',
           chatId: 'ch2',
           createdAt: Date.now(),
-          expiresAt: Date.now() + 3600000,  // expires in 1h
+          expiresAt: Date.now() + 3600000, // expires in 1h
           replies: 1,
         },
       },

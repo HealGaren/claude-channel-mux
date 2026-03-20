@@ -1,6 +1,6 @@
+import { readFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
-import { readFileSync } from 'node:fs'
 
 export const STATE_DIR = join(homedir(), '.claude', 'channels', 'channel-mux')
 export const ACCESS_FILE = join(STATE_DIR, 'access.json')

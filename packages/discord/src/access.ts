@@ -1,11 +1,11 @@
-import { readFileSync, writeFileSync, readdirSync, rmSync } from 'node:fs'
+import { readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import {
   ACCESS_FILE,
+  type Access,
   APPROVED_DIR,
   DEFAULT_ACCESS,
   evaluateGate,
-  type Access,
   type GateResult,
 } from '@claude-channel-mux/core'
 import type { Client, Message } from 'discord.js'
@@ -21,7 +21,7 @@ export function readAccessFile(): Access {
 }
 
 export function saveAccess(a: Access): void {
-  writeFileSync(ACCESS_FILE, JSON.stringify(a, null, 2) + '\n')
+  writeFileSync(ACCESS_FILE, `${JSON.stringify(a, null, 2)}\n`)
 }
 
 export function pruneExpired(a: Access): boolean {
@@ -48,16 +48,19 @@ export async function gate(
   const isThread = !isDM && msg.channel.isThread()
 
   // Resolve mention before calling pure gate logic (guild messages only)
-  const mentioned = !isDM && await isMentioned(msg, client, recentSentIds, access.mentionPatterns)
+  const mentioned = !isDM && (await isMentioned(msg, client, recentSentIds, access.mentionPatterns))
 
-  const result = evaluateGate({
-    senderId: msg.author.id,
-    channelId: msg.channelId,
-    isDM,
-    isThread,
-    parentChannelId: isThread ? (msg.channel.parentId ?? undefined) : undefined,
-    isMentioned: mentioned,
-  }, access)
+  const result = evaluateGate(
+    {
+      senderId: msg.author.id,
+      channelId: msg.channelId,
+      isDM,
+      isThread,
+      parentChannelId: isThread ? (msg.channel.parentId ?? undefined) : undefined,
+      isMentioned: mentioned,
+    },
+    access,
+  )
 
   // Persist access changes from pairing
   if (result.action === 'pair') {
@@ -93,9 +96,7 @@ export async function isMentioned(
   return false
 }
 
-export function checkApprovals(
-  fetchTextChannel: (id: string) => Promise<unknown>,
-): void {
+export function checkApprovals(fetchTextChannel: (id: string) => Promise<unknown>): void {
   let files: string[]
   try {
     files = readdirSync(APPROVED_DIR)

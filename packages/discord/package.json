@@ -13,8 +13,16 @@
     "url": "https://github.com/HealGaren/claude-channel-mux.git",
     "directory": "packages/discord"
   },
-  "keywords": ["claude", "claude-code", "discord", "mcp", "channel"],
-  "engines": { "node": ">=20" },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "discord",
+    "mcp",
+    "channel"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "bin": {
     "channel-mux-daemon": "./dist/daemon.mjs",
     "channel-mux-plugin": "./dist/plugin.mjs"
@@ -25,7 +33,11 @@
       "types": "./dist/index.d.mts"
     }
   },
-  "files": ["dist", "skills", ".claude-plugin"],
+  "files": [
+    "dist",
+    "skills",
+    ".claude-plugin"
+  ],
   "scripts": {
     "build": "tsdown",
     "typecheck": "tsc --noEmit",
