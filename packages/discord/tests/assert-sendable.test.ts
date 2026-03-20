@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os'
 
 const testDir = join(tmpdir(), `channel-mux-sendable-test-${process.pid}`)
 
-vi.mock('../src/core/config.js', () => ({
+vi.mock('@claude-channel-mux/core', () => ({
   STATE_DIR: testDir,
   INBOX_DIR: join(testDir, 'inbox'),
   ACCESS_FILE: join(testDir, 'access.json'),
@@ -15,7 +15,7 @@ vi.mock('../src/core/config.js', () => ({
   APPROVED_DIR: join(testDir, 'approved'),
 }))
 
-const { assertSendable } = await import('../src/adapters/discord/utils.js')
+const { assertSendable } = await import('../src/utils.js')
 
 describe('assertSendable()', () => {
   beforeEach(() => {

@@ -1,0 +1,30 @@
+{
+  "name": "@claude-channel-mux/cli",
+  "version": "0.1.0",
+  "description": "CLI for claude-channel-mux daemon management",
+  "type": "module",
+  "license": "MIT",
+  "author": {
+    "name": "HealGaren",
+    "url": "https://github.com/HealGaren"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HealGaren/claude-channel-mux.git",
+    "directory": "packages/cli"
+  },
+  "keywords": ["claude", "claude-code", "cli"],
+  "engines": { "node": ">=20" },
+  "bin": {
+    "channel-mux": "./dist/cli.mjs"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@claude-channel-mux/core": "workspace:*",
+    "@claude-channel-mux/discord": "workspace:*"
+  }
+}

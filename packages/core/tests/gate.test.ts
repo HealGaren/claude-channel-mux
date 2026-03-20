@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { evaluateGate, type GateInput } from '../src/core/gate.js'
-import type { Access } from '../src/core/types.js'
+import { evaluateGate, type GateInput } from '../src/gate.js'
+import type { Access } from '../src/types.js'
 
 function makeAccess(overrides: Partial<Access> = {}): Access {
   return {

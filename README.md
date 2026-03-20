@@ -16,31 +16,31 @@ The official Claude Code Discord plugin spawns a dedicated bot per session. That
 
 ```
 [Discord Bot]
-       │
-   [Daemon]          ← single bot connection, holds the Discord session
-       │ Unix socket (JSON Lines)
-   ┌───┼───┐
-   │   │   │
-  [A] [B] [C]       ← MCP server plugins, one per Claude Code session
+       |
+   [Daemon]          <- single bot connection, holds the Discord session
+       | Unix socket (JSON Lines)
+   +---+---+
+   |   |   |
+  [A] [B] [C]       <- MCP server plugins, one per Claude Code session
 ```
 
 - **One daemon** holds the bot connection and routes messages
 - **Multiple plugins** (one per Claude session) claim specific channels
-- Messages flow through the daemon — no duplicate bot logins
+- Messages flow through the daemon -- no duplicate bot logins
 
 ## Features
 
-- **Channel multiplexing** — Multiple Claude sessions share one bot
-- **DM pairing** — Secure opt-in flow for direct messages
-- **Guild channel groups** — Per-channel access policies with mention gating
-- **Message chunking** — Respects Discord's 2000-char limit with smart splitting
-- **Attachment handling** — Upload/download with size limits and path security
-- **Prompt injection defense** — Access control mutations only via terminal, never from channel messages
+- **Channel multiplexing** -- Multiple Claude sessions share one bot
+- **DM pairing** -- Secure opt-in flow for direct messages
+- **Guild channel groups** -- Per-channel access policies with mention gating
+- **Message chunking** -- Respects Discord's 2000-char limit with smart splitting
+- **Attachment handling** -- Upload/download with size limits and path security
+- **Prompt injection defense** -- Access control mutations only via terminal, never from channel messages
 
 ## Prerequisites
 
-- **Node.js** ≥ 20
-- **pnpm** (or npm/yarn)
+- **Node.js** >= 20
+- **pnpm** (workspace-enabled package manager)
 - A **Discord bot** with Message Content Intent enabled
 
 ## Installation
@@ -54,19 +54,22 @@ pnpm install
 pnpm run build
 ```
 
+This is a pnpm workspace monorepo. `pnpm install` at the root installs all
+workspace packages and links their internal dependencies.
+
 <!-- ### From npm (planned)
 ```bash
-pnpm add -g claude-channel-mux
+pnpm add -g @claude-channel-mux/cli @claude-channel-mux/discord
 ``` -->
 
 ## Quick Start
 
 ### 1. Create a Discord bot
 
-1. Go to [Discord Developer Portal](https://discord.com/developers/applications) → **New Application**
-2. **Bot** tab → **Reset Token** → copy the token
+1. Go to [Discord Developer Portal](https://discord.com/developers/applications) -> **New Application**
+2. **Bot** tab -> **Reset Token** -> copy the token
 3. Enable **Message Content Intent** under Privileged Gateway Intents
-4. **OAuth2 → URL Generator**:
+4. **OAuth2 -> URL Generator**:
    - Scopes: `bot`
    - Permissions: `Send Messages`, `Read Message History`, `Add Reactions`, `Attach Files`
 5. Open the generated URL to invite the bot to your server
@@ -84,7 +87,7 @@ EOF
 
 ```bash
 # Foreground (see logs directly)
-pnpm start
+pnpm run dev
 
 # Or background via CLI
 channel-mux start
@@ -100,7 +103,7 @@ Add to your `.mcp.json` (project-level or `~/.claude/.mcp.json`):
   "mcpServers": {
     "channel-mux": {
       "command": "node",
-      "args": ["/path/to/claude-channel-mux/dist/plugin.js"],
+      "args": ["./node_modules/@claude-channel-mux/discord/dist/plugin.mjs"],
       "env": {
         "CHANNEL_MUX_CHANNELS": "YOUR_CHANNEL_ID",
         "CHANNEL_MUX_HANDLE_DMS": "true"
@@ -110,7 +113,24 @@ Add to your `.mcp.json` (project-level or `~/.claude/.mcp.json`):
 }
 ```
 
-> **Tip**: Get a channel ID by enabling Developer Mode in Discord settings, then right-clicking a channel → "Copy Channel ID". Separate multiple channels with commas.
+If running from the monorepo source with tsx:
+
+```json
+{
+  "mcpServers": {
+    "channel-mux": {
+      "command": "npx",
+      "args": ["tsx", "packages/discord/src/plugin.ts"],
+      "env": {
+        "CHANNEL_MUX_CHANNELS": "YOUR_CHANNEL_ID",
+        "CHANNEL_MUX_HANDLE_DMS": "true"
+      }
+    }
+  }
+}
+```
+
+> **Tip**: Get a channel ID by enabling Developer Mode in Discord settings, then right-clicking a channel -> "Copy Channel ID". Separate multiple channels with commas.
 
 ### 5. Start chatting
 
@@ -126,7 +146,7 @@ You're paired. Messages now flow to your Claude session.
 
 ```bash
 channel-mux start    # Start daemon in background
-channel-mux stop     # Stop daemon (SIGTERM → SIGKILL)
+channel-mux stop     # Stop daemon (SIGTERM -> SIGKILL)
 channel-mux status   # Check if daemon is running
 ```
 
@@ -168,8 +188,8 @@ Managed via the `/channel-mux:access` skill in your Claude terminal:
 Daemon and plugins communicate via **JSON Lines** over a Unix domain socket.
 
 ```
-Plugin → Daemon: register, tool_call, unregister, ping
-Daemon → Plugin: register_ack, inbound, tool_result, pong, shutdown
+Plugin -> Daemon: register, tool_call, unregister, ping
+Daemon -> Plugin: register_ack, inbound, tool_result, pong, shutdown
 ```
 
 Each request carries a UUID `id` for response correlation. Timeout: 30s.
@@ -191,37 +211,41 @@ interface PlatformAdapter {
 
 ### Security Model
 
-- **Access mutations are terminal-only** — the `/channel-mux:access` skill only runs from the user's terminal, never triggered by channel messages
-- **Outbound gate** — bot can only send to channels listed in `access.json`
-- **File path security** — `assertSendable()` blocks sending state directory files (except inbox)
-- **Attachment sanitization** — filenames are stripped of injection characters
+- **Access mutations are terminal-only** -- the `/channel-mux:access` skill only runs from the user's terminal, never triggered by channel messages
+- **Outbound gate** -- bot can only send to channels listed in `access.json`
+- **File path security** -- `assertSendable()` blocks sending state directory files (except inbox)
+- **Attachment sanitization** -- filenames are stripped of injection characters
 
 ## Project Structure
 
 ```
-src/
-├── core/
-│   ├── types.ts          # IPC protocol + PlatformAdapter interface
-│   ├── config.ts         # Paths, .env loader
-│   ├── ipc-server.ts     # Daemon-side Unix socket server
-│   └── ipc-client.ts     # Plugin-side Unix socket client
-├── adapters/
-│   └── discord/
-│       ├── adapter.ts    # Discord.js PlatformAdapter
-│       ├── access.ts     # Gate logic, pairing, allowlists
-│       └── utils.ts      # chunk(), assertSendable(), safeAttName()
-├── daemon.ts             # Daemon entry point
-├── plugin.ts             # MCP server entry point
-└── cli.ts                # CLI (start/stop/status)
+packages/
+  core/                @claude-channel-mux/core
+    src/
+      types.ts           # IPC protocol + PlatformAdapter interface
+      config.ts          # Paths, .env loader
+      ipc-server.ts      # Daemon-side Unix socket server
+      ipc-client.ts      # Plugin-side Unix socket client
+  discord/             @claude-channel-mux/discord
+    src/
+      daemon.ts          # Daemon entry point
+      plugin.ts          # MCP server entry point
+      adapter.ts         # Discord.js PlatformAdapter
+      access.ts          # Gate logic, pairing, allowlists
+      utils.ts           # chunk(), assertSendable(), safeAttName()
+  cli/                 @claude-channel-mux/cli
+    src/
+      cli.ts             # CLI (start/stop/status)
 ```
 
 ## Development
 
 ```bash
 pnpm install
-pnpm run typecheck    # Type check
+pnpm run build        # Build all packages
+pnpm run typecheck    # Type check all packages
+pnpm run test         # Run tests across all packages
 pnpm run dev          # Start daemon with watch mode
-pnpm run build        # Build to dist/
 ```
 
 See [CLAUDE.md](CLAUDE.md) for detailed development conventions.

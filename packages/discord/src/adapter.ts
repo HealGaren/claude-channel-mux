@@ -11,8 +11,8 @@ import {
 } from 'discord.js'
 import { mkdirSync, writeFileSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import type { PlatformAdapter, InboundMsg, GateResult } from '../../core/types.js'
-import { INBOX_DIR } from '../../core/config.js'
+import type { PlatformAdapter, InboundMsg, GateResult } from '@claude-channel-mux/core'
+import { INBOX_DIR } from '@claude-channel-mux/core'
 import { gate as gateCheck, readAccessFile, checkApprovals } from './access.js'
 import {
   chunk,

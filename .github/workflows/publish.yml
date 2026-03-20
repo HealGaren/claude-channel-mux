@@ -34,6 +34,7 @@ jobs:
           else
             echo "npm_tag=latest" >> "$GITHUB_OUTPUT"
           fi
-      - run: npm publish --tag ${{ steps.tag.outputs.npm_tag }} --provenance --access public
+      - name: Publish all packages
+        run: pnpm -r publish --tag ${{ steps.tag.outputs.npm_tag }} --access public --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

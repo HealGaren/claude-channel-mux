@@ -1,0 +1,30 @@
+{
+  "name": "@claude-channel-mux/core",
+  "version": "0.1.0",
+  "description": "Core IPC, types, and gate logic for claude-channel-mux",
+  "type": "module",
+  "license": "MIT",
+  "author": {
+    "name": "HealGaren",
+    "url": "https://github.com/HealGaren"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HealGaren/claude-channel-mux.git",
+    "directory": "packages/core"
+  },
+  "keywords": ["claude", "claude-code", "mcp", "ipc"],
+  "engines": { "node": ">=20" },
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.mts"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  }
+}

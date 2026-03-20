@@ -2,9 +2,9 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { mkdirSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { IpcServer } from '../src/core/ipc-server.js'
-import { IpcClient } from '../src/core/ipc-client.js'
-import type { InboundMsg } from '../src/core/types.js'
+import { IpcServer } from '../src/ipc-server.js'
+import { IpcClient } from '../src/ipc-client.js'
+import type { InboundMsg } from '../src/types.js'
 
 describe('IPC server/client', () => {
   const testDir = join(tmpdir(), `channel-mux-ipc-test-${process.pid}`)

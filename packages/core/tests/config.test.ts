@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { writeFileSync, mkdirSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { loadEnvFile } from '../src/core/config.js'
+import { loadEnvFile } from '../src/config.js'
 
 describe('loadEnvFile()', () => {
   const testDir = join(tmpdir(), `channel-mux-test-${process.pid}`)

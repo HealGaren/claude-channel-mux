@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import type { Attachment } from 'discord.js'
-import { chunk, safeAttName, noteSent, RECENT_SENT_CAP } from '../src/adapters/discord/utils.js'
+import { chunk, safeAttName, noteSent, RECENT_SENT_CAP } from '../src/utils.js'
 
 describe('chunk()', () => {
   it('returns single-element array when text fits within limit', () => {

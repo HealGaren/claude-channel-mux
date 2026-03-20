@@ -1,9 +1,13 @@
 import { readFileSync, writeFileSync, readdirSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
-import { ACCESS_FILE, APPROVED_DIR } from '../../core/config.js'
-import type { Access, GateResult } from '../../core/types.js'
-import { DEFAULT_ACCESS } from '../../core/types.js'
-import { evaluateGate } from '../../core/gate.js'
+import {
+  ACCESS_FILE,
+  APPROVED_DIR,
+  DEFAULT_ACCESS,
+  evaluateGate,
+  type Access,
+  type GateResult,
+} from '@claude-channel-mux/core'
 import type { Client, Message } from 'discord.js'
 import { ChannelType } from 'discord.js'
 
