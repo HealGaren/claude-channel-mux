@@ -21,8 +21,7 @@
   "files": ["dist"],
   "scripts": {
     "build": "tsdown",
-    "typecheck": "tsc --noEmit",
-    "release": "release-it --no-git --no-github --no-npm"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@claude-channel-mux/core": "workspace:*",

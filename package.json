@@ -21,8 +21,8 @@
     "typecheck": "pnpm --filter @claude-channel-mux/core run build && pnpm -r run typecheck",
     "test": "pnpm -r run test",
     "dev": "pnpm --filter @claude-channel-mux/discord run dev",
-    "release": "pnpm -r --workspace-concurrency=1 run release && release-it",
-    "release:alpha": "pnpm -r --workspace-concurrency=1 run release -- --preRelease=alpha && release-it --preRelease=alpha"
+    "release": "pnpm -r exec release-it --no-git --no-github --no-npm && release-it",
+    "release:alpha": "pnpm -r exec release-it --no-git --no-github --no-npm --preRelease=alpha && release-it --preRelease=alpha"
   },
   "devDependencies": {
     "@release-it/conventional-changelog": "^10.0.6",

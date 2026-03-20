@@ -31,8 +31,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "start": "tsx src/daemon.ts",
-    "dev": "tsx --watch src/daemon.ts",
-    "release": "release-it --no-git --no-github --no-npm"
+    "dev": "tsx --watch src/daemon.ts"
   },
   "dependencies": {
     "@claude-channel-mux/core": "workspace:*",

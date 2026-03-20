@@ -21,42 +21,45 @@ function readPid(): number | null {
   }
 }
 
+function cleanupStateFiles(): void {
+  try { unlinkSync(PID_FILE) } catch {}
+  try { unlinkSync(SOCK_PATH) } catch {}
+}
+
 /**
  * Resolve the daemon command and arguments.
  *
- * In a production install the `channel-mux-daemon` bin (provided by
- * @claude-channel-mux/discord) is on PATH, so we spawn it directly with
- * Node.  In a development checkout we fall back to running the TypeScript
- * source via tsx.
+ * Resolution order:
+ * 1. channel-mux-daemon bin on PATH (production global install)
+ * 2. Built daemon.mjs via import.meta.resolve (production local install)
+ * 3. Source daemon.ts via tsx (development)
  */
 function resolveDaemonCommand(): { runner: string; args: string[] } {
-  // Try to locate the built daemon entry from the discord package
+  // 1. Try bin on PATH
   try {
     const daemonBin = execSync('which channel-mux-daemon', { encoding: 'utf8' }).trim()
     return { runner: process.execPath, args: [daemonBin] }
   } catch {
-    // Not on PATH -- fall back to dev mode (tsx + source)
+    // not on PATH
   }
 
-  // Resolve daemon from the discord package
+  // 2-3. Resolve via discord package
   try {
     const discordPkg = import.meta.resolve('@claude-channel-mux/discord')
     const discordDir = new URL('.', discordPkg).pathname
 
-    // Production: built daemon.mjs in dist/
     const builtDaemon = join(discordDir, 'daemon.mjs')
     if (existsSync(builtDaemon)) {
       return { runner: process.execPath, args: [builtDaemon] }
     }
 
-    // Dev: source daemon.ts via tsx
     const srcDaemon = join(discordDir, '..', 'src', 'daemon.ts')
     if (existsSync(srcDaemon)) {
       const tsx = execSync('which tsx', { encoding: 'utf8' }).trim()
       return { runner: tsx, args: [srcDaemon] }
     }
-  } catch {
-    // ignore
+  } catch (err) {
+    process.stderr.write(`channel-mux: daemon resolve failed: ${err}\n`)
   }
 
   console.error(
@@ -75,14 +78,11 @@ switch (command) {
       process.exit(0)
     }
 
-    // Clean up stale files
     if (pid && !isProcessAlive(pid)) {
-      try { unlinkSync(PID_FILE) } catch {}
-      try { unlinkSync(SOCK_PATH) } catch {}
+      cleanupStateFiles()
     }
 
     const logPath = join(STATE_DIR, 'daemon.log')
-
     const { runner, args: runnerArgs } = resolveDaemonCommand()
 
     mkdirSync(STATE_DIR, { recursive: true })
@@ -120,8 +120,7 @@ switch (command) {
     const pid = readPid()
     if (!pid || !isProcessAlive(pid)) {
       console.log('channel-mux daemon is not running')
-      try { unlinkSync(PID_FILE) } catch {}
-      try { unlinkSync(SOCK_PATH) } catch {}
+      cleanupStateFiles()
       process.exit(0)
     }
 
@@ -139,11 +138,14 @@ switch (command) {
 
     if (!stopped) {
       process.stderr.write('channel-mux: SIGTERM timeout, sending SIGKILL\n')
-      try { process.kill(pid, 'SIGKILL') } catch {}
+      try {
+        process.kill(pid, 'SIGKILL')
+      } catch (err) {
+        process.stderr.write(`channel-mux: SIGKILL failed: ${err}\n`)
+      }
     }
 
-    try { unlinkSync(PID_FILE) } catch {}
-    try { unlinkSync(SOCK_PATH) } catch {}
+    cleanupStateFiles()
     console.log('channel-mux daemon stopped')
     break
   }
