@@ -12,7 +12,8 @@
     "releaseName": "v${version}"
   },
   "hooks": {
-    "before:init": ["pnpm run build", "pnpm run typecheck", "pnpm test"]
+    "before:init": ["pnpm run build", "pnpm run typecheck", "pnpm test"],
+    "after:bump": "npx tsx scripts/sync-versions.ts"
   },
   "plugins": {
     "@release-it/conventional-changelog": {
