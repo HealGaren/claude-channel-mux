@@ -1,11 +1,6 @@
-import net from 'node:net'
 import { randomUUID } from 'node:crypto'
-import type {
-  DaemonMessage,
-  InboundMsg,
-  RegisterAckMsg,
-  ToolResultMsg,
-} from './types.js'
+import net from 'node:net'
+import type { DaemonMessage, InboundMsg, RegisterAckMsg, ToolResultMsg } from './types.js'
 
 export const DEFAULT_REQUEST_TIMEOUT_MS = 30_000
 
@@ -143,7 +138,7 @@ export class IpcClient {
 
   private send(msg: Record<string, unknown>): void {
     if (!this.socket) throw new Error('not connected')
-    this.socket.write(JSON.stringify(msg) + '\n')
+    this.socket.write(`${JSON.stringify(msg)}\n`)
   }
 
   private waitForResponse(id: string): Promise<DaemonMessage> {

@@ -140,11 +140,7 @@ export interface PlatformAdapter {
     files?: string[]
   }): Promise<{ sentIds: string[] }>
 
-  react(args: {
-    chat_id: string
-    message_id: string
-    emoji: string
-  }): Promise<void>
+  react(args: { chat_id: string; message_id: string; emoji: string }): Promise<void>
 
   editMessage(args: {
     chat_id: string
@@ -152,10 +148,7 @@ export interface PlatformAdapter {
     text: string
   }): Promise<{ editedId: string }>
 
-  fetchMessages(args: {
-    channel: string
-    limit?: number
-  }): Promise<string>
+  fetchMessages(args: { channel: string; limit?: number }): Promise<string>
 
   downloadAttachment(args: {
     chat_id: string

@@ -1,14 +1,14 @@
-import net from 'node:net'
 import { unlinkSync } from 'node:fs'
+import net from 'node:net'
 import type {
-  Session,
+  DaemonMessage,
   InboundMsg,
   PluginMessage,
   RegisterMsg,
+  Session,
+  ToolCallHandler,
   ToolCallMsg,
   UnregisterMsg,
-  ToolCallHandler,
-  DaemonMessage,
 } from './types.js'
 
 export class IpcServer {
@@ -249,6 +249,6 @@ export class IpcServer {
   }
 
   private send(socket: net.Socket, msg: DaemonMessage): void {
-    socket.write(JSON.stringify(msg) + '\n')
+    socket.write(`${JSON.stringify(msg)}\n`)
   }
 }

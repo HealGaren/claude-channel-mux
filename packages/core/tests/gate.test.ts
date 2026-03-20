@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { evaluateGate, type GateInput } from '../src/gate.js'
 import type { Access } from '../src/types.js'
 
@@ -94,9 +94,27 @@ describe('evaluateGate() DM', () => {
   it('drops when 3 pending codes already exist', () => {
     const access = makeAccess({
       pending: {
-        aaa: { senderId: 'other-1', chatId: 'c', createdAt: 0, expiresAt: Date.now() + 3600000, replies: 1 },
-        bbb: { senderId: 'other-2', chatId: 'c', createdAt: 0, expiresAt: Date.now() + 3600000, replies: 1 },
-        ccc: { senderId: 'other-3', chatId: 'c', createdAt: 0, expiresAt: Date.now() + 3600000, replies: 1 },
+        aaa: {
+          senderId: 'other-1',
+          chatId: 'c',
+          createdAt: 0,
+          expiresAt: Date.now() + 3600000,
+          replies: 1,
+        },
+        bbb: {
+          senderId: 'other-2',
+          chatId: 'c',
+          createdAt: 0,
+          expiresAt: Date.now() + 3600000,
+          replies: 1,
+        },
+        ccc: {
+          senderId: 'other-3',
+          chatId: 'c',
+          createdAt: 0,
+          expiresAt: Date.now() + 3600000,
+          replies: 1,
+        },
       },
     })
     const result = evaluateGate(makeInput({ isDM: true }), access)
@@ -155,11 +173,14 @@ describe('evaluateGate() guild', () => {
     const access = makeAccess({
       groups: { 'parent-ch': { requireMention: false, allowFrom: [] } },
     })
-    const result = evaluateGate(makeInput({
-      channelId: 'thread-ch',
-      isThread: true,
-      parentChannelId: 'parent-ch',
-    }), access)
+    const result = evaluateGate(
+      makeInput({
+        channelId: 'thread-ch',
+        isThread: true,
+        parentChannelId: 'parent-ch',
+      }),
+      access,
+    )
     expect(result.action).toBe('deliver')
   })
 
@@ -167,11 +188,14 @@ describe('evaluateGate() guild', () => {
     const access = makeAccess({
       groups: { 'thread-ch': { requireMention: false, allowFrom: [] } },
     })
-    const result = evaluateGate(makeInput({
-      channelId: 'thread-ch',
-      isThread: true,
-      parentChannelId: undefined,
-    }), access)
+    const result = evaluateGate(
+      makeInput({
+        channelId: 'thread-ch',
+        isThread: true,
+        parentChannelId: undefined,
+      }),
+      access,
+    )
     expect(result.action).toBe('deliver')
   })
 })

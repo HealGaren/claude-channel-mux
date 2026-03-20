@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { mkdirSync, rmSync } from 'node:fs'
-import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { IpcServer } from '../src/ipc-server.js'
+import { join } from 'node:path'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { IpcClient } from '../src/ipc-client.js'
+import { IpcServer } from '../src/ipc-server.js'
 import type { InboundMsg } from '../src/types.js'
 
 describe('IPC server/client', () => {
@@ -161,7 +161,7 @@ describe('IPC server/client', () => {
   })
 
   it('forwards tool calls and returns results', async () => {
-    server.onToolCall(async (tool, args) => {
+    server.onToolCall(async (tool, _args) => {
       if (tool === 'reply') {
         return { sentIds: ['sent-1'], result: 'ok' }
       }
@@ -215,9 +215,9 @@ describe('IPC server/client', () => {
     await client.register('session-1', [], false)
 
     const start = Date.now()
-    await expect(
-      client.toolCall('session-1', 'reply', { text: 'hello' }),
-    ).rejects.toThrow('timed out')
+    await expect(client.toolCall('session-1', 'reply', { text: 'hello' })).rejects.toThrow(
+      'timed out',
+    )
     const elapsed = Date.now() - start
 
     expect(elapsed).toBeGreaterThanOrEqual(150)
@@ -234,8 +234,12 @@ describe('IPC server/client', () => {
 
     let shutdown1 = false
     let shutdown2 = false
-    client1.onShutdown(() => { shutdown1 = true })
-    client2.onShutdown(() => { shutdown2 = true })
+    client1.onShutdown(() => {
+      shutdown1 = true
+    })
+    client2.onShutdown(() => {
+      shutdown2 = true
+    })
 
     server.broadcastShutdown()
     await new Promise((r) => setTimeout(r, 50))

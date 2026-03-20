@@ -1,6 +1,6 @@
-import { readFileSync, existsSync, unlinkSync, openSync, closeSync, mkdirSync } from 'node:fs'
+import { execSync, spawn } from 'node:child_process'
+import { closeSync, existsSync, mkdirSync, openSync, readFileSync, unlinkSync } from 'node:fs'
 import { join } from 'node:path'
-import { spawn, execSync } from 'node:child_process'
 import { PID_FILE, SOCK_PATH, STATE_DIR } from '@claude-channel-mux/core'
 
 function isProcessAlive(pid: number): boolean {
@@ -15,15 +15,19 @@ function isProcessAlive(pid: number): boolean {
 function readPid(): number | null {
   try {
     const pid = parseInt(readFileSync(PID_FILE, 'utf8').trim(), 10)
-    return isNaN(pid) ? null : pid
+    return Number.isNaN(pid) ? null : pid
   } catch {
     return null
   }
 }
 
 function cleanupStateFiles(): void {
-  try { unlinkSync(PID_FILE) } catch {}
-  try { unlinkSync(SOCK_PATH) } catch {}
+  try {
+    unlinkSync(PID_FILE)
+  } catch {}
+  try {
+    unlinkSync(SOCK_PATH)
+  } catch {}
 }
 
 /**
