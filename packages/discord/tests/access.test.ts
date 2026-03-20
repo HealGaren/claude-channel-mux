@@ -2,13 +2,14 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { writeFileSync, mkdirSync, rmSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import type { Access } from '../src/core/types.js'
+import type { Access } from '@claude-channel-mux/core'
 
 // Mock config paths before importing access module
 const testDir = join(tmpdir(), `channel-mux-access-test-${process.pid}`)
 const accessFile = join(testDir, 'access.json')
 
-vi.mock('../src/core/config.js', () => ({
+vi.mock('@claude-channel-mux/core', () => ({
+  DEFAULT_ACCESS: { dmPolicy: 'pairing', allowFrom: [], groups: {}, pending: {} },
   STATE_DIR: testDir,
   ACCESS_FILE: accessFile,
   APPROVED_DIR: join(testDir, 'approved'),
@@ -20,7 +21,7 @@ vi.mock('../src/core/config.js', () => ({
 
 // Import after mock
 const { readAccessFile, saveAccess, pruneExpired } = await import(
-  '../src/adapters/discord/access.js'
+  '../src/access.js'
 )
 
 describe('access file operations', () => {

@@ -1,16 +1,3 @@
 {
-  "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "outDir": "dist",
-    "rootDir": ".",
-    "declaration": true,
-    "sourceMap": true,
-    "types": ["node"]
-  },
-  "include": ["src/**/*", "bin/**/*"]
+  "files": []
 }

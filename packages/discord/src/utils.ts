@@ -1,6 +1,6 @@
 import { realpathSync } from 'node:fs'
 import { join, sep } from 'node:path'
-import { STATE_DIR, INBOX_DIR } from '../../core/config.js'
+import { STATE_DIR, INBOX_DIR } from '@claude-channel-mux/core'
 import type { Attachment } from 'discord.js'
 
 export const MAX_CHUNK_LIMIT = 2000

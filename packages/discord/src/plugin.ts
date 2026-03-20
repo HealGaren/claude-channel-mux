@@ -5,8 +5,7 @@ import {
   ListToolsRequestSchema,
   CallToolRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js'
-import { IpcClient } from './core/ipc-client.js'
-import { SOCK_PATH } from './core/config.js'
+import { IpcClient, SOCK_PATH } from '@claude-channel-mux/core'
 
 const sessionId = randomUUID()
 

@@ -2,7 +2,7 @@ import { readFileSync, existsSync, unlinkSync, openSync, closeSync, mkdirSync } 
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawn, execSync } from 'node:child_process'
-import { PID_FILE, SOCK_PATH, STATE_DIR } from './core/config.js'
+import { PID_FILE, SOCK_PATH, STATE_DIR } from '@claude-channel-mux/core'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 

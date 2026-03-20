@@ -1,7 +1,6 @@
 import { mkdirSync, writeFileSync, unlinkSync } from 'node:fs'
-import { DiscordAdapter } from './adapters/discord/adapter.js'
-import { IpcServer } from './core/ipc-server.js'
-import { loadEnvFile, SOCK_PATH, PID_FILE, STATE_DIR } from './core/config.js'
+import { DiscordAdapter } from './adapter.js'
+import { IpcServer, loadEnvFile, SOCK_PATH, PID_FILE, STATE_DIR } from '@claude-channel-mux/core'
 
 async function main() {
   loadEnvFile()

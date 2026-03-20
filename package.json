@@ -1,8 +1,7 @@
 {
-  "name": "claude-channel-mux",
-  "version": "0.1.0",
+  "name": "claude-channel-mux-root",
+  "private": true,
   "description": "Multiplex Claude Code channel sessions through a single Discord bot",
-  "type": "module",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -12,55 +11,17 @@
     "name": "HealGaren",
     "url": "https://github.com/HealGaren"
   },
-  "keywords": [
-    "claude",
-    "claude-code",
-    "discord",
-    "mcp",
-    "multiplexer",
-    "channel"
-  ],
   "engines": {
     "node": ">=20"
   },
   "packageManager": "pnpm@10.32.1",
-  "files": [
-    "dist",
-    "skills",
-    ".claude-plugin"
-  ],
-  "exports": {
-    "./types": {
-      "import": "./dist/types.mjs",
-      "types": "./dist/types.d.mts"
-    },
-    "./ipc": {
-      "import": "./dist/ipc.mjs",
-      "types": "./dist/ipc.d.mts"
-    },
-    "./adapters/discord": {
-      "import": "./dist/adapters-discord.mjs",
-      "types": "./dist/adapters-discord.d.mts"
-    }
-  },
-  "bin": {
-    "channel-mux": "./dist/cli.mjs",
-    "channel-mux-plugin": "./dist/plugin.mjs"
-  },
   "scripts": {
-    "start": "tsx src/daemon.ts",
-    "dev": "tsx --watch src/daemon.ts",
-    "build": "tsdown",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "prepublishOnly": "pnpm run build",
+    "build": "pnpm -r run build",
+    "typecheck": "pnpm --filter @claude-channel-mux/core run build && pnpm -r run typecheck",
+    "test": "pnpm -r run test",
+    "dev": "pnpm --filter @claude-channel-mux/discord run dev",
     "release": "release-it",
     "release:alpha": "release-it --preRelease=alpha --npm.tag=alpha"
-  },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.0",
-    "discord.js": "^14.14.0"
   },
   "devDependencies": {
     "@release-it/conventional-changelog": "^10.0.6",
