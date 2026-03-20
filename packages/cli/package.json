@@ -25,6 +25,7 @@
     "release": "release-it --no-git --no-github --no-npm"
   },
   "dependencies": {
-    "@claude-channel-mux/core": "workspace:*"
+    "@claude-channel-mux/core": "workspace:*",
+    "@claude-channel-mux/discord": "workspace:*"
   }
 }

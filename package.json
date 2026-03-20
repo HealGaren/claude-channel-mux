@@ -1,6 +1,7 @@
 {
   "name": "claude-channel-mux-root",
   "private": true,
+  "type": "module",
   "description": "Multiplex Claude Code channel sessions through a single Discord bot",
   "license": "MIT",
   "repository": {
@@ -24,7 +25,6 @@
     "release:alpha": "pnpm -r --workspace-concurrency=1 run release -- --preRelease=alpha && release-it --preRelease=alpha"
   },
   "devDependencies": {
-    "@release-it/bumper": "^7.0.5",
     "@release-it/conventional-changelog": "^10.0.6",
     "@types/node": "^20.0.0",
     "release-it": "^19.2.4",

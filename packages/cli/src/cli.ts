@@ -1,10 +1,7 @@
 import { readFileSync, existsSync, unlinkSync, openSync, closeSync, mkdirSync } from 'node:fs'
-import { join, dirname } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import { spawn, execSync } from 'node:child_process'
 import { PID_FILE, SOCK_PATH, STATE_DIR } from '@claude-channel-mux/core'
-
-const __dirname = dirname(fileURLToPath(import.meta.url))
 
 function isProcessAlive(pid: number): boolean {
   try {
@@ -22,6 +19,44 @@ function readPid(): number | null {
   } catch {
     return null
   }
+}
+
+/**
+ * Resolve the daemon command and arguments.
+ *
+ * In a production install the `channel-mux-daemon` bin (provided by
+ * @claude-channel-mux/discord) is on PATH, so we spawn it directly with
+ * Node.  In a development checkout we fall back to running the TypeScript
+ * source via tsx.
+ */
+function resolveDaemonCommand(): { runner: string; args: string[] } {
+  // Try to locate the built daemon entry from the discord package
+  try {
+    const daemonBin = execSync('which channel-mux-daemon', { encoding: 'utf8' }).trim()
+    return { runner: process.execPath, args: [daemonBin] }
+  } catch {
+    // Not on PATH -- fall back to dev mode (tsx + source)
+  }
+
+  // Dev mode: resolve the discord package source via import.meta
+  try {
+    const discordPkg = import.meta.resolve('@claude-channel-mux/discord')
+    // discordPkg points to the package entry (e.g. .../dist/index.mjs or .../src/index.ts)
+    // We need the daemon source which sits next to it
+    const discordDir = new URL('.', discordPkg).pathname
+    const srcDaemon = join(discordDir, '..', 'src', 'daemon.ts')
+    if (existsSync(srcDaemon)) {
+      const tsx = execSync('which tsx', { encoding: 'utf8' }).trim()
+      return { runner: tsx, args: [srcDaemon] }
+    }
+  } catch {
+    // ignore
+  }
+
+  console.error(
+    'channel-mux: cannot locate daemon. Ensure @claude-channel-mux/discord is installed.',
+  )
+  process.exit(1)
 }
 
 const command = process.argv[2]
@@ -42,26 +77,7 @@ switch (command) {
 
     const logPath = join(STATE_DIR, 'daemon.log')
 
-    // Find daemon entry point: built (daemon.mjs) or source (daemon.ts)
-    const builtDaemon = join(__dirname, 'daemon.mjs')
-    const srcDaemon = join(__dirname, 'daemon.ts')
-    const useBuilt = existsSync(builtDaemon)
-    const daemonPath = useBuilt ? builtDaemon : srcDaemon
-
-    let runner: string
-    let runnerArgs: string[]
-    if (useBuilt) {
-      runner = process.execPath  // node
-      runnerArgs = [daemonPath]
-    } else {
-      try {
-        runner = execSync('which tsx', { encoding: 'utf8' }).trim()
-      } catch {
-        console.error('channel-mux: tsx not found. Install with: pnpm add -g tsx')
-        process.exit(1)
-      }
-      runnerArgs = [daemonPath]
-    }
+    const { runner, args: runnerArgs } = resolveDaemonCommand()
 
     mkdirSync(STATE_DIR, { recursive: true })
     let logFd: number
