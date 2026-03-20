@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  # OIDC trusted publishing planned, keeping id-token for future use
   id-token: write
 
 jobs:
@@ -18,6 +19,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          registry-url: https://registry.npmjs.org
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build
@@ -34,10 +36,12 @@ jobs:
             echo "npm_tag=latest" >> "$GITHUB_OUTPUT"
           fi
       - name: Publish packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           TAG="${{ steps.tag.outputs.npm_tag }}"
           for pkg in packages/core packages/discord packages/cli; do
             echo "Publishing $pkg..."
             cd "$GITHUB_WORKSPACE/$pkg"
-            NODE_AUTH_TOKEN="" npm publish --tag "$TAG" --access public --provenance
+            npm publish --tag "$TAG" --access public
           done
