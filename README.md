@@ -4,7 +4,7 @@
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-<!-- [![CI](https://github.com/HealGaren/claude-channel-mux/actions/workflows/ci.yml/badge.svg)](https://github.com/HealGaren/claude-channel-mux/actions/workflows/ci.yml) -->
+[![CI](https://github.com/HealGaren/claude-channel-mux/actions/workflows/ci.yml/badge.svg)](https://github.com/HealGaren/claude-channel-mux/actions/workflows/ci.yml)
 
 ---
 
