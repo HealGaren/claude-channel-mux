@@ -59,9 +59,10 @@ jobs:
             FLAGS="--prerelease"
           fi
           # Extract current version section from CHANGELOG.md
+          # Header format: "# 0.1.0-alpha.2 (2026-03-21)"
           VERSION="${TAG#v}"
-          NOTES=$(sed -n "/^# ${VERSION}/,/^# [0-9]/p" CHANGELOG.md | sed '1d;$d')
+          NOTES=$(awk "/^#+ .*${VERSION}/{found=1; next} /^#+ [0-9]/{if(found) exit} found" CHANGELOG.md)
           if [ -z "$NOTES" ]; then
             NOTES="Release ${TAG}"
           fi
-          gh release create "$TAG" --title "$TAG" --notes "$NOTES" $FLAGS
+          gh release create "$TAG" --title "$TAG" --notes "$NOTES" ${FLAGS:+$FLAGS}
