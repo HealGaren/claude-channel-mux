@@ -18,9 +18,9 @@ channel-mux stop     # Stop daemon (SIGTERM, then SIGKILL)
 channel-mux status   # Check if daemon is running
 ```
 
-## Prerequisites
+## Note
 
-Requires `@claude-channel-mux/discord` to be installed (provides the daemon binary).
+`@claude-channel-mux/discord` is included as a dependency and installed automatically (provides the daemon binary).
 
 ## License
 
