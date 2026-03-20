@@ -1,7 +1,26 @@
 {
   "name": "claude-channel-mux",
   "version": "0.1.0",
+  "description": "Multiplex Claude Code channel sessions through a single Discord bot",
   "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HealGaren/claude-channel-mux.git"
+  },
+  "author": "HealGaren",
+  "keywords": [
+    "claude",
+    "claude-code",
+    "discord",
+    "mcp",
+    "multiplexer",
+    "channel"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@10.32.1",
   "files": [
     "dist",
     "skills",
