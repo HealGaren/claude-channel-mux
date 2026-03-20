@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { randomUUID } from 'node:crypto'
 import { IpcClient, SOCK_PATH } from '@claude-channel-mux/core'
 import { Server } from '@modelcontextprotocol/sdk/server/index.js'

@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { mkdirSync, unlinkSync, writeFileSync } from 'node:fs'
 import { IpcServer, loadEnvFile, PID_FILE, SOCK_PATH, STATE_DIR } from '@claude-channel-mux/core'
 import { DiscordAdapter } from './adapter.js'
