@@ -1,0 +1,23 @@
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Runtime state (lives in ~/.claude/channels/channel-mux/)
+daemon.sock
+daemon.pid
+daemon.log
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
