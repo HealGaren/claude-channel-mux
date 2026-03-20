@@ -4,23 +4,37 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
+const PACKAGES = ['core', 'discord', 'cli'] as const
+type PackageName = (typeof PACKAGES)[number]
+
 const ROOT = join(import.meta.dirname, '..', '..')
 const TMP = join(tmpdir(), `channel-mux-smoke-${process.pid}`)
-const tarballs: Record<string, string> = {}
+const tarballs: Partial<Record<PackageName, string>> = {}
 
 function run(cmd: string, cwd?: string): string {
   return execSync(cmd, { cwd: cwd ?? ROOT, encoding: 'utf8', timeout: 30_000 }).trim()
 }
 
+function extractTarball(pkg: PackageName): string {
+  const extracted = join(TMP, `${pkg}-check`)
+  mkdirSync(extracted, { recursive: true })
+  run(`tar xzf ${tarballs[pkg]} -C ${extracted}`)
+  return join(extracted, 'package')
+}
+
+function getExports(pkg: PackageName): string {
+  const indexPath = join(ROOT, `packages/${pkg}/dist/index.mjs`)
+  return run(
+    `node -e "import('${indexPath}').then(m => console.log(Object.keys(m).sort().join(',')))"`,
+  )
+}
+
 describe('smoke tests', () => {
   beforeAll(() => {
     mkdirSync(TMP, { recursive: true })
-
-    // Build all packages
     run('pnpm run build')
 
-    // Pack each package into tarball
-    for (const pkg of ['core', 'discord', 'cli']) {
+    for (const pkg of PACKAGES) {
       const pkgDir = join(ROOT, 'packages', pkg)
       const output = run(`pnpm pack --pack-destination ${TMP}`, pkgDir)
       const tarball = output.split('\n').pop()!
@@ -33,50 +47,35 @@ describe('smoke tests', () => {
   })
 
   it('pnpm pack produces tarballs for all packages', () => {
-    expect(tarballs.core).toBeTruthy()
-    expect(tarballs.discord).toBeTruthy()
-    expect(tarballs.cli).toBeTruthy()
-
-    for (const tarball of Object.values(tarballs)) {
-      expect(existsSync(tarball)).toBe(true)
+    for (const pkg of PACKAGES) {
+      expect(tarballs[pkg]).toBeTruthy()
+      expect(existsSync(tarballs[pkg]!)).toBe(true)
     }
   })
 
   it('core tarball contains dist/ with index.mjs and index.d.mts', () => {
-    const extracted = join(TMP, 'core-check')
-    mkdirSync(extracted, { recursive: true })
-    run(`tar xzf ${tarballs.core} -C ${extracted}`)
-
-    const distFiles = readdirSync(join(extracted, 'package', 'dist'))
+    const pkgRoot = extractTarball('core')
+    const distFiles = readdirSync(join(pkgRoot, 'dist'))
     expect(distFiles.some((f) => f.includes('index.mjs'))).toBe(true)
     expect(distFiles.some((f) => f.includes('index.d.mts'))).toBe(true)
   })
 
   it('discord tarball contains dist/, skills/, .claude-plugin/', () => {
-    const extracted = join(TMP, 'discord-check')
-    mkdirSync(extracted, { recursive: true })
-    run(`tar xzf ${tarballs.discord} -C ${extracted}`)
-
-    const contents = readdirSync(join(extracted, 'package'))
+    const pkgRoot = extractTarball('discord')
+    const contents = readdirSync(pkgRoot)
     expect(contents).toContain('dist')
     expect(contents).toContain('skills')
     expect(contents).toContain('.claude-plugin')
   })
 
   it('cli tarball contains dist/ with cli.mjs', () => {
-    const extracted = join(TMP, 'cli-check')
-    mkdirSync(extracted, { recursive: true })
-    run(`tar xzf ${tarballs.cli} -C ${extracted}`)
-
-    const distFiles = readdirSync(join(extracted, 'package', 'dist'))
+    const pkgRoot = extractTarball('cli')
+    const distFiles = readdirSync(join(pkgRoot, 'dist'))
     expect(distFiles.some((f) => f.includes('cli.mjs'))).toBe(true)
   })
 
   it('core exports resolve correctly', () => {
-    const coreIndex = join(ROOT, 'packages/core/dist/index.mjs')
-    const result = run(
-      `node -e "import('${coreIndex}').then(m => console.log(Object.keys(m).sort().join(',')))"`,
-    )
+    const result = getExports('core')
     expect(result).toContain('IpcClient')
     expect(result).toContain('IpcServer')
     expect(result).toContain('evaluateGate')
@@ -84,10 +83,7 @@ describe('smoke tests', () => {
   })
 
   it('discord exports resolve correctly', () => {
-    const discordIndex = join(ROOT, 'packages/discord/dist/index.mjs')
-    const result = run(
-      `node -e "import('${discordIndex}').then(m => console.log(Object.keys(m).sort().join(',')))"`,
-    )
+    const result = getExports('discord')
     expect(result).toContain('DiscordAdapter')
     expect(result).toContain('chunk')
   })
