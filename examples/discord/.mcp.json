@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "channel-mux": {
+      "command": "channel-mux-plugin",
+      "env": {
+        "CHANNEL_MUX_CHANNELS": "REPLACE_WITH_YOUR_CHANNEL_ID",
+        "CHANNEL_MUX_HANDLE_DMS": "true"
+      }
+    }
+  }
+}

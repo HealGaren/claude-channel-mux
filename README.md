@@ -59,22 +59,29 @@ pnpm run build
 This is a pnpm workspace monorepo. `pnpm install` at the root installs all
 workspace packages and links their internal dependencies.
 
-<!-- ### From npm (planned)
+### From npm registry
+
 ```bash
-pnpm add -g @claude-channel-mux/cli @claude-channel-mux/discord
-``` -->
+# npm
+npm install -g @claude-channel-mux/cli
+
+# pnpm
+pnpm add -g @claude-channel-mux/cli
+
+# yarn
+yarn global add @claude-channel-mux/cli
+```
 
 ## Quick Start
 
 ### 1. Create a Discord bot
 
-1. Go to [Discord Developer Portal](https://discord.com/developers/applications) -> **New Application**
-2. **Bot** tab -> **Reset Token** -> copy the token
-3. Enable **Message Content Intent** under Privileged Gateway Intents
-4. **OAuth2 -> URL Generator**:
-   - Scopes: `bot`
-   - Permissions: `Send Messages`, `Read Message History`, `Add Reactions`, `Attach Files`
-5. Open the generated URL to invite the bot to your server
+See the [Discord Setup Guide](docs/guides/discord-setup.md) for detailed instructions, or the short version:
+
+1. [Discord Developer Portal](https://discord.com/developers/applications) > **New Application** > **Bot** > **Reset Token**
+2. Enable **Message Content Intent**
+3. **OAuth2 > URL Generator**: scope `bot`, permissions: Send Messages, Read Message History, Add Reactions, Attach Files
+4. Invite the bot to your server with the generated URL
 
 ### 2. Configure
 
@@ -98,14 +105,13 @@ channel-mux status
 
 ### 4. Connect Claude Code
 
-Add to your `.mcp.json` (project-level or `~/.claude/.mcp.json`):
+Add to your `.mcp.json` (project-level or `~/.claude/.mcp.json`). See the [MCP Configuration Guide](docs/guides/mcp-config.md) for details.
 
 ```json
 {
   "mcpServers": {
     "channel-mux": {
-      "command": "node",
-      "args": ["./node_modules/@claude-channel-mux/discord/dist/plugin.mjs"],
+      "command": "channel-mux-plugin",
       "env": {
         "CHANNEL_MUX_CHANNELS": "YOUR_CHANNEL_ID",
         "CHANNEL_MUX_HANDLE_DMS": "true"
