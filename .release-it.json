@@ -2,7 +2,7 @@
   "git": {
     "commitMessage": "release: v${version}",
     "tagName": "v${version}",
-    "requireCleanWorkingDir": true
+    "requireCleanWorkingDir": false
   },
   "npm": {
     "publish": false
@@ -12,8 +12,7 @@
     "releaseName": "v${version}"
   },
   "hooks": {
-    "before:init": ["pnpm run typecheck", "pnpm test"],
-    "after:bump": "pnpm run build"
+    "before:init": ["pnpm run build", "pnpm run typecheck", "pnpm test"]
   },
   "plugins": {
     "@release-it/conventional-changelog": {

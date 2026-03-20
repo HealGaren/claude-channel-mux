@@ -4,11 +4,17 @@
   "description": "Discord adapter, daemon, and plugin for claude-channel-mux",
   "type": "module",
   "license": "MIT",
+  "author": {
+    "name": "HealGaren",
+    "url": "https://github.com/HealGaren"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/HealGaren/claude-channel-mux.git",
     "directory": "packages/discord"
   },
+  "keywords": ["claude", "claude-code", "discord", "mcp", "channel"],
+  "engines": { "node": ">=20" },
   "bin": {
     "channel-mux-daemon": "./dist/daemon.mjs",
     "channel-mux-plugin": "./dist/plugin.mjs"
@@ -19,13 +25,14 @@
       "types": "./dist/index.d.mts"
     }
   },
-  "files": ["dist"],
+  "files": ["dist", "skills", ".claude-plugin"],
   "scripts": {
     "build": "tsdown",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "start": "tsx src/daemon.ts",
-    "dev": "tsx --watch src/daemon.ts"
+    "dev": "tsx --watch src/daemon.ts",
+    "release": "release-it --no-git --no-github --no-npm"
   },
   "dependencies": {
     "@claude-channel-mux/core": "workspace:*",
