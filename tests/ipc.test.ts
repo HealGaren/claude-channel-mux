@@ -196,15 +196,11 @@ describe('IPC server/client', () => {
     client.disconnect('session-1')
   })
 
-  it('handles ping/pong', async () => {
-    // Ping is fire-and-forget in the current protocol,
-    // but we can verify the connection stays alive after sending it
+  it('allows re-registration from same session', async () => {
     const client = await createClient()
     const ack = await client.register('session-1', ['ch-500'], false)
     expect(ack.ok).toBe(true)
 
-    // Send another register to verify the connection is still alive
-    // (re-register same session is allowed)
     const ack2 = await client.register('session-1', ['ch-500'], false)
     expect(ack2.ok).toBe(true)
 

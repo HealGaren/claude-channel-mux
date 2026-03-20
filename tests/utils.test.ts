@@ -23,11 +23,7 @@ describe('chunk()', () => {
 
   describe('newline mode', () => {
     it('prefers paragraph breaks', () => {
-      const text = 'aaaa\n\nbbbb\n\ncccc'
-      // limit=10, paragraph break at index 4 which is > 10/2=5? No, 4 < 5
-      // Let's use a bigger example
       const long = 'a'.repeat(6) + '\n\n' + 'b'.repeat(6) + '\n\n' + 'c'.repeat(6)
-      // "aaaaaa\n\nbbbbbb\n\ncccccc" = 22 chars, limit=15
       const result = chunk(long, 15, 'newline')
       expect(result[0]).toBe('aaaaaa\n\nbbbbbb')
       expect(result[1]).toBe('cccccc')
@@ -56,18 +52,11 @@ describe('chunk()', () => {
     })
 
     it('strips leading newlines from remainder', () => {
-      // "aaaaaa\n\n\n\nbbbbbb" = 16 chars, limit=10
-      // lastIndexOf('\n\n', 10) = 7, which is > 5 (limit/2), so cut=7
-      // first chunk: "aaaaaa\n" (0..7), remainder: "\n\nbbbbbb"
-      // strip leading newlines from remainder -> "bbbbbb"
-      // But actually slice(0, cut) includes up to index 7
-      // Let's just verify the behavior empirically
       const text = 'aaaa\n\n\n\nbbbb'
       const result = chunk(text, 6, 'newline')
-      // The key point: leading newlines on remainder chunks get stripped
-      expect(result.length).toBeGreaterThanOrEqual(2)
-      // Last chunk should not have leading newlines
-      expect(result[result.length - 1]).toBe('bbbb')
+      expect(result).toHaveLength(2)
+      expect(result[0]).toBe('aaaa\n\n')
+      expect(result[1]).toBe('bbbb')
     })
   })
 
