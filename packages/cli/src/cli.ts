@@ -2,7 +2,7 @@
 import { execSync, spawn } from 'node:child_process'
 import { closeSync, existsSync, mkdirSync, openSync, readFileSync, unlinkSync } from 'node:fs'
 import { join } from 'node:path'
-import { ACCESS_FILE, MONITOR_PORT_FILE, PID_FILE, SOCK_PATH, STATE_DIR } from '@claude-channel-mux/core'
+import { MONITOR_PORT_FILE, PID_FILE, SOCK_PATH, STATE_DIR } from '@claude-channel-mux/core'
 import { readAccessFile, saveAccess } from '@claude-channel-mux/discord'
 
 function isProcessAlive(pid: number): boolean {
