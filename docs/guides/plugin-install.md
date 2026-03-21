@@ -64,115 +64,27 @@ claude --dangerously-load-development-channels server:channel-mux
 
 If you prefer to configure the MCP server manually instead of using the plugin marketplace:
 
-### 1. Install the package
-
-```bash
-npm install -g @claude-channel-mux/cli
-```
-
-### 2. Configure .mcp.json
-
-Add to your `.mcp.json` (project-level or `~/.claude/.mcp.json`):
-
-```json
-{
-  "mcpServers": {
-    "channel-mux": {
-      "command": "channel-mux-plugin",
-      "env": {
-        "CHANNEL_MUX_CHANNELS": "YOUR_CHANNEL_ID",
-        "CHANNEL_MUX_HANDLE_DMS": "true"
-      }
-    }
-  }
-}
-```
-
-Replace `YOUR_CHANNEL_ID` with your Discord channel ID (see [Discord Setup Guide](./discord-setup.md#7-get-channel-ids)).
-
-### 3. Start Claude Code with channels enabled
-
-```bash
-claude --dangerously-load-development-channels server:channel-mux
-```
+1. Install: `npm install -g @claude-channel-mux/cli`
+2. Configure MCP server: see [MCP Configuration Guide](./mcp-config.md) for `.mcp.json` setup
+3. Configure channels: `channel-mux daemon group add <channelId>` and `channel-mux session channels <channelId>`
+4. Start Claude Code: `claude --dangerously-load-development-channels server:channel-mux`
 
 ## Install from source (for development)
 
 For contributors or testing unreleased changes.
 
-### 1. Clone and build
-
-```bash
-git clone git@github.com:HealGaren/claude-channel-mux.git
-cd claude-channel-mux
-pnpm install
-pnpm run build
-```
-
-### 2. Start the daemon
-
-```bash
-pnpm run dev          # foreground with watch mode
-# or
-node packages/cli/dist/cli.mjs daemon start   # background
-```
-
-### 3. Configure .mcp.json
-
-```json
-{
-  "mcpServers": {
-    "channel-mux": {
-      "command": "node",
-      "args": ["/path/to/claude-channel-mux/packages/discord/dist/plugin.mjs"],
-      "env": {
-        "CHANNEL_MUX_CHANNELS": "YOUR_CHANNEL_ID",
-        "CHANNEL_MUX_HANDLE_DMS": "true"
-      }
-    }
-  }
-}
-```
-
-Or with tsx (direct TypeScript execution):
-
-```json
-{
-  "mcpServers": {
-    "channel-mux": {
-      "command": "npx",
-      "args": ["tsx", "/path/to/claude-channel-mux/packages/discord/src/plugin.ts"],
-      "env": {
-        "CHANNEL_MUX_CHANNELS": "YOUR_CHANNEL_ID",
-        "CHANNEL_MUX_HANDLE_DMS": "true"
-      }
-    }
-  }
-}
-```
-
-### 4. Start Claude Code
-
-```bash
-claude --dangerously-load-development-channels server:channel-mux
-```
-
-Or load it as a plugin directory:
-
-```bash
-claude --plugin-dir ./packages/discord --dangerously-load-development-channels plugin:channel-mux
-```
-
-### 5. Reload after changes
-
-```bash
-pnpm run build
-```
-
-Then in Claude Code:
-```
-/reload-plugins
-```
+1. Clone and build:
+   ```bash
+   git clone git@github.com:HealGaren/claude-channel-mux.git
+   cd claude-channel-mux
+   pnpm install
+   pnpm run build
+   ```
+2. Start the daemon: `pnpm run dev` (foreground) or `node packages/cli/dist/cli.mjs daemon start` (background)
+3. Configure MCP server: see [MCP Configuration Guide](./mcp-config.md) for `.mcp.json` setup (use "Local install" section)
+4. Start Claude Code: `claude --dangerously-load-development-channels server:channel-mux`
+   - Or as plugin directory: `claude --plugin-dir ./packages/discord --dangerously-load-development-channels plugin:channel-mux`
+5. After code changes: `pnpm run build` then `/reload-plugins` in Claude Code
 
 ## First conversation (DM pairing)
 
