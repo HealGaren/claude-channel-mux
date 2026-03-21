@@ -1,5 +1,5 @@
 import { execSync } from 'node:child_process'
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -131,9 +131,7 @@ describe('smoke tests', () => {
     })
 
     it('session shows env vars', () => {
-      const result = run(
-        `CHANNEL_MUX_CHANNELS=111,222 CHANNEL_MUX_HANDLE_DMS=true ${cli} session`,
-      )
+      const result = run(`CHANNEL_MUX_CHANNELS=111,222 CHANNEL_MUX_HANDLE_DMS=true ${cli} session`)
       expect(result).toContain('env:')
       expect(result).toContain('channels: 111,222')
       expect(result).toContain('DMs: true')

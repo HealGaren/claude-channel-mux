@@ -340,7 +340,9 @@ switch (command) {
       case 'channels': {
         const channelIds = sessionArgs.filter((a) => !a.startsWith('-'))
         if (channelIds.length === 0) {
-          console.error('Usage: channel-mux session channels <id> [id2 ...] [--scope=local|project|user]')
+          console.error(
+            'Usage: channel-mux session channels <id> [id2 ...] [--scope=local|project|user]',
+          )
           process.exit(1)
         }
         writeMcpEnv('CHANNEL_MUX_CHANNELS', channelIds.join(','))
