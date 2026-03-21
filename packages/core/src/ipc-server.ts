@@ -48,6 +48,20 @@ export class IpcServer {
     this.server = null
   }
 
+  getSessionSnapshots(): Array<{
+    sessionId: string
+    channels: string[]
+    handleDMs: boolean
+    connectedAt: number
+  }> {
+    return [...this.sessions.values()].map((s) => ({
+      sessionId: s.sessionId,
+      channels: [...s.channels],
+      handleDMs: s.handleDMs,
+      connectedAt: s.connectedAt,
+    }))
+  }
+
   setBotUsername(name: string): void {
     this.botUsername = name
   }
@@ -170,6 +184,7 @@ export class IpcServer {
       socket,
       channels: new Set(msg.channels),
       handleDMs: msg.handleDMs,
+      connectedAt: existing?.connectedAt ?? Date.now(),
     }
 
     this.sessions.set(msg.sessionId, session)

@@ -4,6 +4,7 @@ export {
   ENV_FILE,
   INBOX_DIR,
   loadEnvFile,
+  MONITOR_PORT_FILE,
   PID_FILE,
   SOCK_PATH,
   STATE_DIR,
@@ -13,6 +14,14 @@ export { evaluateGate, type GateInput } from './gate.js'
 export { DEFAULT_REQUEST_TIMEOUT_MS, IpcClient } from './ipc-client.js'
 
 export { IpcServer } from './ipc-server.js'
+export {
+  type MonitorEvent,
+  MonitorServer,
+  type RequestLogEntry,
+  type SessionSnapshot,
+  type StatusProvider,
+} from './monitor.js'
+export { RingBuffer } from './ring-buffer.js'
 export type {
   Access,
   DaemonMessage,

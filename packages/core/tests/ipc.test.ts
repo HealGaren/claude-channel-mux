@@ -226,6 +226,28 @@ describe('IPC server/client', () => {
     client.disconnect('session-1')
   })
 
+  it('returns session snapshots', async () => {
+    const client1 = await createClient()
+    const client2 = await createClient()
+    await client1.register('session-1', ['ch-700'], false)
+    await client2.register('session-2', ['ch-701', 'ch-702'], true)
+
+    const snapshots = server.getSessionSnapshots()
+    expect(snapshots).toHaveLength(2)
+
+    const s1 = snapshots.find((s) => s.sessionId === 'session-1')!
+    expect(s1.channels).toEqual(['ch-700'])
+    expect(s1.handleDMs).toBe(false)
+    expect(s1.connectedAt).toBeGreaterThan(0)
+
+    const s2 = snapshots.find((s) => s.sessionId === 'session-2')!
+    expect(s2.channels).toEqual(expect.arrayContaining(['ch-701', 'ch-702']))
+    expect(s2.handleDMs).toBe(true)
+
+    client1.disconnect('session-1')
+    client2.disconnect('session-2')
+  })
+
   it('broadcasts shutdown to all connected clients', async () => {
     const client1 = await createClient()
     const client2 = await createClient()
