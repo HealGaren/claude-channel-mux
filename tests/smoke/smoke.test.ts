@@ -94,6 +94,31 @@ describe('smoke tests', () => {
     expect(result).toContain('channel-mux daemon')
   })
 
+  it('channel-mux group add/list/rm works', () => {
+    const fakeHome = join(TMP, 'fake-home')
+    mkdirSync(join(fakeHome, '.claude', 'channels', 'channel-mux'), { recursive: true })
+    const cli = `HOME=${fakeHome} node packages/cli/dist/cli.mjs`
+
+    const addResult = run(`${cli} group add 111 222 333`)
+    expect(addResult).toContain('Added 3 channel(s)')
+
+    const addDupe = run(`${cli} group add 111 444`)
+    expect(addDupe).toContain('Added 1 channel(s)')
+
+    const listResult = run(`${cli} group list`)
+    expect(listResult).toContain('111')
+    expect(listResult).toContain('222')
+    expect(listResult).toContain('444')
+
+    const rmResult = run(`${cli} group rm 222 333`)
+    expect(rmResult).toContain('Removed 2 channel(s)')
+
+    const listAfter = run(`${cli} group list`)
+    expect(listAfter).toContain('111')
+    expect(listAfter).toContain('444')
+    expect(listAfter).not.toContain('222')
+  })
+
   it('channel-mux-plugin exits with correct error (no daemon)', () => {
     try {
       run('node packages/discord/dist/plugin.mjs')
