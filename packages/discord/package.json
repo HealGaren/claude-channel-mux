@@ -1,6 +1,6 @@
 {
   "name": "@claude-channel-mux/discord",
-  "version": "0.1.0-alpha.3",
+  "version": "0.1.1-alpha.1",
   "description": "Discord adapter, daemon, and plugin for claude-channel-mux",
   "type": "module",
   "license": "MIT",

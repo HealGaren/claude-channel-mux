@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.1.1-alpha.1](https://github.com/HealGaren/claude-channel-mux/compare/v0.1.0-alpha.3...v0.1.1-alpha.1) (2026-03-21)
+
+
+### Bug Fixes
+
+* exclude settings.local.json from biome checks ([#90](https://github.com/HealGaren/claude-channel-mux/issues/90)) ([03a392f](https://github.com/HealGaren/claude-channel-mux/commit/03a392fc830ff8a28c50f474219a2992ba1ad60d))
+
+
+### Features
+
+* add .mcp.json to discord plugin package ([#91](https://github.com/HealGaren/claude-channel-mux/issues/91)) ([4c8e727](https://github.com/HealGaren/claude-channel-mux/commit/4c8e7279c25355d587c256b504e1a6f1546dc689))
+* add channel config commands to CLI and skill ([#93](https://github.com/HealGaren/claude-channel-mux/issues/93)) ([cc671c9](https://github.com/HealGaren/claude-channel-mux/commit/cc671c9248e47a9e0509ab9056f43eeadce759a9))
+* add daemon monitoring HTTP server ([#80](https://github.com/HealGaren/claude-channel-mux/issues/80)) ([cfd4e56](https://github.com/HealGaren/claude-channel-mux/commit/cfd4e5650dfdc695948b2a8df85d4a82ae4c5987)), closes [#78](https://github.com/HealGaren/claude-channel-mux/issues/78)
+* add plugin marketplace and fix channel capability ([#69](https://github.com/HealGaren/claude-channel-mux/issues/69)) ([28956f6](https://github.com/HealGaren/claude-channel-mux/commit/28956f66d63859e8aa6514ed19685564f627d352))
+* add verbose debug logging ([#79](https://github.com/HealGaren/claude-channel-mux/issues/79)) ([5eeda9d](https://github.com/HealGaren/claude-channel-mux/commit/5eeda9dc93f3259b5e94a70711f3edde7ab18224))
+
 # [0.1.0-alpha.3](https://github.com/HealGaren/claude-channel-mux/compare/v0.1.0-alpha.2...v0.1.0-alpha.3) (2026-03-20)
 
 
