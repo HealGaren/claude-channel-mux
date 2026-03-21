@@ -179,6 +179,44 @@ All runtime state lives in `~/.claude/channels/channel-mux/`:
   approved/         Pairing approval files
 ```
 
+```mermaid
+graph LR
+    subgraph Components
+        D[Daemon]
+        A[Adapter]
+        G[Gate]
+        CLI[CLI]
+        Skill[Access Skill]
+    end
+
+    subgraph State Files
+        ENV[.env]
+        ACC[access.json]
+        PID[daemon.pid]
+        SOCK[daemon.sock]
+        MON[monitor.port]
+        INB[inbox/]
+        APR[approved/]
+    end
+
+    D -->|read| ENV
+    D -->|write/delete| PID
+    D -->|write/delete| SOCK
+    D -->|write/delete| MON
+    G -->|read| ACC
+    A -->|write| INB
+    A -->|read/delete| APR
+    Skill -->|read/write| ACC
+    Skill -->|write| APR
+    CLI -->|read/delete| PID
+    CLI -->|delete| SOCK
+    CLI -->|read/delete| MON
+```
+
+- **`.env`** and **`access.json`** are the only user-facing config files
+- **`approved/`** bridges the terminal skill and the daemon: the skill writes approval files, the daemon's adapter polls and consumes them
+- **`daemon.pid`**, **`daemon.sock`**, **`monitor.port`** are ephemeral process state, cleaned up on shutdown or by CLI
+
 ## IPC Protocol
 
 JSON Lines (newline-delimited JSON) over Unix domain socket.
