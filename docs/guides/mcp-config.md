@@ -1,6 +1,8 @@
 # MCP Configuration Guide
 
-This guide explains how to connect claude-channel-mux to Claude Code via `.mcp.json`.
+This guide explains how to manually connect claude-channel-mux to Claude Code via `.mcp.json`.
+
+> **Recommended**: Install via the [plugin marketplace](./plugin-install.md#install-from-marketplace-recommended) instead. The plugin ships with `.mcp.json` pre-configured, so manual setup is not needed. This guide is for cases where you need custom MCP configuration or are installing from source.
 
 ## Prerequisites
 
