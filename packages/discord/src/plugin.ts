@@ -33,7 +33,7 @@ const _botUsername = ack.botUsername ?? 'channel-mux-bot'
 const mcp = new Server(
   { name: 'channel-mux', version: '0.1.0' },
   {
-    capabilities: { tools: {} },
+    capabilities: { experimental: { 'claude/channel': {} }, tools: {} },
     instructions: [
       'The sender reads Discord, not this session. Anything you want them to see must go through the reply tool — your transcript output never reaches their chat.',
       '',
