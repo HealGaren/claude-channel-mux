@@ -36,12 +36,11 @@ async function main() {
 
   const adapter = new DiscordAdapter()
 
-  const monitorPort = process.env.MONITOR_PORT
-    ? Number.parseInt(process.env.MONITOR_PORT, 10)
-    : null
+  const rawMonitorPort = process.env.MONITOR_PORT
+  const monitorPort = rawMonitorPort ? Number.parseInt(rawMonitorPort, 10) : null
   let monitor: MonitorServer | null = null
 
-  if (monitorPort) {
+  if (monitorPort && !Number.isNaN(monitorPort)) {
     monitor = new MonitorServer(() => ({
       uptime: Math.floor((Date.now() - startedAt) / 1000),
       sessions: ipc.getSessionSnapshots(),

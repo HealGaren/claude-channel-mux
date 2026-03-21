@@ -65,6 +65,11 @@ export class MonitorServer {
     })
   }
 
+  get port(): number | null {
+    const addr = this.server?.address()
+    return addr && typeof addr === 'object' ? addr.port : null
+  }
+
   stop(): void {
     for (const res of this.sseClients) {
       res.end()

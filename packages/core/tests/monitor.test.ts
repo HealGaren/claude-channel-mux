@@ -15,10 +15,9 @@ describe('MonitorServer', () => {
   })
 
   beforeEach(async () => {
-    // Use random port to avoid conflicts
-    port = 10000 + Math.floor(Math.random() * 50000)
     monitor = new MonitorServer(statusProvider, { bufferSize: 5 })
-    await monitor.start(port)
+    await monitor.start(0)
+    port = monitor.port!
   })
 
   afterEach(() => {

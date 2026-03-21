@@ -29,6 +29,9 @@ function cleanupStateFiles(): void {
   try {
     unlinkSync(SOCK_PATH)
   } catch {}
+  try {
+    unlinkSync(MONITOR_PORT_FILE)
+  } catch {}
 }
 
 /**
