@@ -1,8 +1,8 @@
 import { execSync } from 'node:child_process'
-import { existsSync, mkdirSync, readdirSync, rmSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 const PACKAGES = ['core', 'discord', 'cli'] as const
 type PackageName = (typeof PACKAGES)[number]
@@ -89,18 +89,125 @@ describe('smoke tests', () => {
     expect(result).toContain('chunk')
   })
 
-  it('channel-mux status command works', () => {
-    const result = run('node packages/cli/dist/cli.mjs status')
-    expect(result).toContain('channel-mux daemon')
-  })
+  describe('CLI (isolated HOME)', () => {
+    let fakeHome: string
+    let cli: string
+    let testIndex = 0
 
-  it('channel-mux-plugin exits with correct error (no daemon)', () => {
-    try {
-      run('node packages/discord/dist/plugin.mjs')
-      expect.unreachable('should have thrown')
-    } catch (err: unknown) {
-      const msg = (err as Error).message ?? String(err)
-      expect(msg).toContain('cannot connect to daemon')
-    }
+    beforeEach(() => {
+      testIndex++
+      fakeHome = join(TMP, `fake-home-${testIndex}`)
+      mkdirSync(join(fakeHome, '.claude', 'channels', 'channel-mux'), { recursive: true })
+      cli = `HOME=${fakeHome} node packages/cli/dist/cli.mjs`
+    })
+
+    it('daemon status', () => {
+      const result = run(`${cli} daemon status`)
+      expect(result).toContain('channel-mux daemon')
+    })
+
+    it('daemon group add/list/rm', () => {
+      expect(run(`${cli} daemon group add 111 222 333`)).toContain('Added 3 channel(s)')
+      expect(run(`${cli} daemon group add 111 444`)).toContain('Added 1 channel(s)')
+
+      const list = run(`${cli} daemon group list`)
+      expect(list).toContain('111')
+      expect(list).toContain('222')
+      expect(list).toContain('444')
+
+      expect(run(`${cli} daemon group rm 222 333`)).toContain('Removed 2 channel(s)')
+
+      const listAfter = run(`${cli} daemon group list`)
+      expect(listAfter).toContain('111')
+      expect(listAfter).toContain('444')
+      expect(listAfter).not.toContain('222')
+    })
+
+    it('daemon group add --no-mention', () => {
+      run(`${cli} daemon group add 555 --no-mention`)
+      const list = run(`${cli} daemon group list`)
+      expect(list).toContain('555')
+      expect(list).not.toContain('mention-required')
+    })
+
+    it('session shows env vars', () => {
+      const result = run(`CHANNEL_MUX_CHANNELS=111,222 CHANNEL_MUX_HANDLE_DMS=true ${cli} session`)
+      expect(result).toContain('env:')
+      expect(result).toContain('channels: 111,222')
+      expect(result).toContain('DMs: true')
+    })
+
+    it('session shows .mcp.json config', () => {
+      const fakeProject = join(TMP, `fake-project-${testIndex}`)
+      mkdirSync(join(fakeProject, '.claude'), { recursive: true })
+      writeFileSync(
+        join(fakeProject, '.claude', '.mcp.json'),
+        JSON.stringify({
+          mcpServers: { 'channel-mux': { env: { CHANNEL_MUX_CHANNELS: '999' } } },
+        }),
+      )
+      const result = run(
+        `cd ${fakeProject} && HOME=${fakeHome} node ${join(ROOT, 'packages/cli/dist/cli.mjs')} session`,
+      )
+      expect(result).toContain('local')
+      expect(result).toContain('999')
+    })
+
+    it('session channels writes .mcp.json', () => {
+      const fakeProject = join(TMP, `fake-project-write-${testIndex}`)
+      mkdirSync(join(fakeProject, '.claude'), { recursive: true })
+      const cliCmd = `HOME=${fakeHome} node ${join(ROOT, 'packages/cli/dist/cli.mjs')}`
+
+      const result = run(`cd ${fakeProject} && ${cliCmd} session channels 111 222 --scope=local`)
+      expect(result).toContain('CHANNEL_MUX_CHANNELS=111,222')
+      expect(result).toContain('local')
+
+      const written = JSON.parse(readFileSync(join(fakeProject, '.claude', '.mcp.json'), 'utf8'))
+      expect(written.mcpServers['channel-mux'].env.CHANNEL_MUX_CHANNELS).toBe('111,222')
+    })
+
+    it('session dms writes .mcp.json', () => {
+      const fakeProject = join(TMP, `fake-project-dms-${testIndex}`)
+      mkdirSync(fakeProject, { recursive: true })
+      const cliCmd = `HOME=${fakeHome} node ${join(ROOT, 'packages/cli/dist/cli.mjs')}`
+
+      const result = run(`cd ${fakeProject} && ${cliCmd} session dms true --scope=project`)
+      expect(result).toContain('CHANNEL_MUX_HANDLE_DMS=true')
+      expect(result).toContain('project')
+
+      const written = JSON.parse(readFileSync(join(fakeProject, '.mcp.json'), 'utf8'))
+      expect(written.mcpServers['channel-mux'].env.CHANNEL_MUX_HANDLE_DMS).toBe('true')
+    })
+
+    it('session channels preserves existing .mcp.json content', () => {
+      const fakeProject = join(TMP, `fake-project-preserve-${testIndex}`)
+      mkdirSync(join(fakeProject, '.claude'), { recursive: true })
+      writeFileSync(
+        join(fakeProject, '.claude', '.mcp.json'),
+        JSON.stringify({ mcpServers: { other: { command: 'foo' } } }),
+      )
+      const cliCmd = `HOME=${fakeHome} node ${join(ROOT, 'packages/cli/dist/cli.mjs')}`
+
+      run(`cd ${fakeProject} && ${cliCmd} session channels 555 --scope=local`)
+
+      const written = JSON.parse(readFileSync(join(fakeProject, '.claude', '.mcp.json'), 'utf8'))
+      expect(written.mcpServers.other.command).toBe('foo')
+      expect(written.mcpServers['channel-mux'].env.CHANNEL_MUX_CHANNELS).toBe('555')
+    })
+
+    it('session shows no config when empty', () => {
+      const result = run(`CHANNEL_MUX_CHANNELS= CHANNEL_MUX_HANDLE_DMS= ${cli} session`)
+      expect(result).toContain('No channel-mux session config found')
+    })
+
+    it('plugin exits with correct error (no daemon)', () => {
+      try {
+        run(`HOME=${fakeHome} node packages/discord/dist/plugin.mjs`)
+        expect.unreachable('should have thrown')
+      } catch (err: unknown) {
+        const msg = (err as Error).message ?? String(err)
+        expect(msg).toContain('cannot connect to daemon')
+      }
+    })
   })
 })

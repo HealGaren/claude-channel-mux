@@ -210,7 +210,7 @@ export class DiscordAdapter implements PlatformAdapter {
       if (ch && 'send' in ch && typeof ch.send === 'function') {
         const prefix = isResend ? 'Pairing code (resent)' : 'Pairing code'
         await ch.send(
-          `${prefix}: **${code}**\nAsk the Claude Code user to run: \`/channel-mux:access pair ${code}\``,
+          `${prefix}: **${code}**\nAsk the Claude Code user to run: \`/channel-mux:daemon pair ${code}\``,
         )
       }
     } catch (err) {
@@ -309,6 +309,6 @@ export class DiscordAdapter implements PlatformAdapter {
       if (key in access.groups) return ch
     }
 
-    throw new Error(`channel ${id} is not allowlisted — add via /channel-mux:access`)
+    throw new Error(`channel ${id} is not allowlisted -- add via /channel-mux:daemon`)
   }
 }
