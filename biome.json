@@ -27,6 +27,13 @@
     }
   },
   "files": {
-    "includes": ["**", "!**/dist", "!**/node_modules", "!**/pnpm-lock.yaml", "!**/CHANGELOG.md"]
+    "includes": [
+      "**",
+      "!**/dist",
+      "!**/node_modules",
+      "!**/pnpm-lock.yaml",
+      "!**/CHANGELOG.md",
+      "!.claude/settings.local.json"
+    ]
   }
 }
