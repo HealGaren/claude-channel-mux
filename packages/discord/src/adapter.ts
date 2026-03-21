@@ -229,7 +229,14 @@ export class DiscordAdapter implements PlatformAdapter {
     if (msg.author.bot) return
 
     const gateResult = await this.gate({ platform: 'discord', raw: msg })
-    dbg('gate', `channel=${msg.channelId}`, `user=${msg.author.id}`, `action=${gateResult.action}`)
+    if (dbg.enabled) {
+      dbg(
+        'gate',
+        `channel=${msg.channelId}`,
+        `user=${msg.author.id}`,
+        `action=${gateResult.action}`,
+      )
+    }
 
     if (gateResult.action === 'pair') {
       await this.sendPairingCode(msg.channelId, gateResult.code, gateResult.isResend)

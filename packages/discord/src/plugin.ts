@@ -166,7 +166,9 @@ ipc.onInbound((msg) => {
       .map((a) => `${a.name} (${a.contentType}, ${Math.round(a.size / 1024)}KB)`)
       .join('; ')
   }
-  dbg('notify', `channel=${msg.channelId}`, `message=${msg.messageId}`, `user=${msg.username}`)
+  if (dbg.enabled) {
+    dbg('notify', `channel=${msg.channelId}`, `message=${msg.messageId}`, `user=${msg.username}`)
+  }
   void mcp.notification({
     method: 'notifications/claude/channel',
     params: {

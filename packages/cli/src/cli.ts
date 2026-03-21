@@ -77,7 +77,7 @@ const command = process.argv[2]
 
 switch (command) {
   case 'start': {
-    const verbose = process.argv.includes('--verbose') || process.argv.includes('-v')
+    const verbose = process.argv.includes('--verbose')
 
     const pid = readPid()
     if (pid && isProcessAlive(pid)) {
