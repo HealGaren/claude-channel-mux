@@ -28,12 +28,18 @@
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
     "release": "release-it",
-    "release:alpha": "release-it --preRelease=alpha"
+    "release:alpha": "release-it --preRelease=alpha",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,mjs,json}": "biome check --no-errors-on-unmatched"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.8",
     "@release-it/conventional-changelog": "^10.0.6",
     "@types/node": "^20.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "release-it": "^19.2.4",
     "tsdown": "^0.21.4",
     "tsx": "^4.0.0",
