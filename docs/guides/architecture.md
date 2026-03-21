@@ -11,7 +11,7 @@ graph TB
     end
 
     subgraph Daemon Process
-        Adapter[DiscordAdapter]
+        Adapter["Adapter (Discord, Slack, ...)"]
         Gate[Gate Check]
         IPC[IPC Server]
         Monitor[Monitor Server]
@@ -197,34 +197,16 @@ Ephemeral files -- created on startup, cleaned up on shutdown or by `channel-mux
 
 ```mermaid
 graph LR
-    subgraph Daemon
-        D[ ]
-    end
-    subgraph Files
-        PID[daemon.pid]
-        SOCK[daemon.sock]
-        MON[monitor.port]
-    end
-
-    D -->|start / stop| PID
-    D -->|start / stop| SOCK
-    D -->|start / stop| MON
+    Daemon -->|start / stop| PID[daemon.pid]
+    Daemon -->|start / stop| SOCK[daemon.sock]
+    Daemon -->|start / stop| MON[monitor.port]
 ```
 
 ```mermaid
 graph LR
-    subgraph CLI
-        C[ ]
-    end
-    subgraph Files
-        PID[daemon.pid]
-        SOCK[daemon.sock]
-        MON[monitor.port]
-    end
-
-    C -->|read status / cleanup| PID
-    C -->|cleanup| SOCK
-    C -->|read status / cleanup| MON
+    CLI -->|read status / cleanup| PID[daemon.pid]
+    CLI -->|cleanup| SOCK[daemon.sock]
+    CLI -->|read status / cleanup| MON[monitor.port]
 ```
 
 ### Pairing Bridge
@@ -233,14 +215,14 @@ graph LR
 graph LR
     subgraph Components
         Skill[Access Skill]
-        Adapter
+        Adp["Adapter (Discord, Slack, ...)"]
     end
     subgraph Files
         APR[approved/]
     end
 
     Skill -->|write approval| APR
-    APR -->|poll & consume| Adapter
+    APR -->|poll & consume| Adp
 ```
 
 The `approved/` directory bridges the terminal skill and the daemon. The skill writes a file per approved user; the adapter polls and deletes it after sending confirmation.
@@ -250,14 +232,14 @@ The `approved/` directory bridges the terminal skill and the daemon. The skill w
 ```mermaid
 graph LR
     subgraph Components
-        Adapter
+        Adp["Adapter (Discord, Slack, ...)"]
         Claude[Claude Code]
     end
     subgraph Files
         INB[inbox/]
     end
 
-    Adapter -->|download & save| INB
+    Adp -->|download & save| INB
     INB -->|read| Claude
 ```
 
