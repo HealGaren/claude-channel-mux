@@ -171,9 +171,19 @@ All runtime state lives in `~/.claude/channels/channel-mux/`.
 
 ```mermaid
 graph LR
-    ENV[.env] -->|read on startup| Daemon
-    ACC[access.json] -->|read per message| Gate
-    ACC -->|read/write| Skill[Access Skill]
+    subgraph Components
+        Daemon
+        Gate
+        Skill[Access Skill]
+    end
+    subgraph Files
+        ENV[.env]
+        ACC[access.json]
+    end
+
+    ENV -->|read on startup| Daemon
+    ACC -->|read per message| Gate
+    ACC -->|read/write| Skill
 ```
 
 | File | Description |
@@ -187,31 +197,69 @@ Ephemeral files -- created on startup, cleaned up on shutdown or by `channel-mux
 
 ```mermaid
 graph LR
-    Daemon -->|start / stop| PID[daemon.pid]
-    Daemon -->|start / stop| SOCK[daemon.sock]
-    Daemon -->|start / stop| MON[monitor.port]
+    subgraph Daemon
+        D[ ]
+    end
+    subgraph Files
+        PID[daemon.pid]
+        SOCK[daemon.sock]
+        MON[monitor.port]
+    end
+
+    D -->|start / stop| PID
+    D -->|start / stop| SOCK
+    D -->|start / stop| MON
 ```
 
 ```mermaid
 graph LR
-    CLI -->|read status / cleanup| PID[daemon.pid]
-    CLI -->|cleanup| SOCK[daemon.sock]
-    CLI -->|read status / cleanup| MON[monitor.port]
+    subgraph CLI
+        C[ ]
+    end
+    subgraph Files
+        PID[daemon.pid]
+        SOCK[daemon.sock]
+        MON[monitor.port]
+    end
+
+    C -->|read status / cleanup| PID
+    C -->|cleanup| SOCK
+    C -->|read status / cleanup| MON
 ```
 
 ### Pairing Bridge
 
 ```mermaid
 graph LR
-    Skill[Access Skill] -->|write approval| APR[approved/]
-    Adapter -->|poll & consume| APR
+    subgraph Components
+        Skill[Access Skill]
+        Adapter
+    end
+    subgraph Files
+        APR[approved/]
+    end
+
+    Skill -->|write approval| APR
+    APR -->|poll & consume| Adapter
 ```
 
 The `approved/` directory bridges the terminal skill and the daemon. The skill writes a file per approved user; the adapter polls and deletes it after sending confirmation.
 
 ### Attachments
 
-The `inbox/` directory stores files downloaded via `download_attachment` tool. Written by the adapter, read by Claude Code sessions.
+```mermaid
+graph LR
+    subgraph Components
+        Adapter
+        Claude[Claude Code]
+    end
+    subgraph Files
+        INB[inbox/]
+    end
+
+    Adapter -->|download & save| INB
+    INB -->|read| Claude
+```
 
 ## IPC Protocol
 
