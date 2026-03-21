@@ -1,15 +1,9 @@
 import http from 'node:http'
 import { createDebug } from './debug.js'
 import { RingBuffer } from './ring-buffer.js'
+import type { SessionSnapshot } from './types.js'
 
 const dbg = createDebug('mux:monitor')
-
-export type SessionSnapshot = {
-  sessionId: string
-  channels: string[]
-  handleDMs: boolean
-  connectedAt: number
-}
 
 export type RequestLogEntry = {
   timestamp: string
@@ -21,8 +15,8 @@ export type RequestLogEntry = {
 }
 
 export type MonitorEvent = {
-  event: string
-  data: Record<string, unknown>
+  event: 'inbound' | 'tool_call' | 'session_connect' | 'session_disconnect'
+  data: RequestLogEntry | { sessionId: string }
   timestamp: string
 }
 
@@ -95,11 +89,7 @@ export class MonitorServer {
       summary: truncate(`${msg.username}: ${msg.content}`),
     }
     this.requests.push(entry)
-    this.emit({
-      event: 'inbound',
-      data: entry as unknown as Record<string, unknown>,
-      timestamp: entry.timestamp,
-    })
+    this.emit({ event: 'inbound', data: entry, timestamp: entry.timestamp })
   }
 
   recordToolCall(
@@ -108,29 +98,25 @@ export class MonitorServer {
     ok: boolean,
     sessionId?: string,
   ): void {
+    const argsPreview = truncate(JSON.stringify(args), 150)
     const entry: RequestLogEntry = {
       timestamp: new Date().toISOString(),
       direction: 'outbound',
       type: tool,
       channelId: args.chat_id as string | undefined,
       sessionId,
-      summary: truncate(`${tool}(${JSON.stringify(args)}) -> ${ok ? 'ok' : 'error'}`),
+      summary: `${tool}(${argsPreview}) -> ${ok ? 'ok' : 'error'}`,
     }
     this.requests.push(entry)
-    this.emit({
-      event: 'tool_call',
-      data: entry as unknown as Record<string, unknown>,
-      timestamp: entry.timestamp,
-    })
+    this.emit({ event: 'tool_call', data: entry, timestamp: entry.timestamp })
   }
 
   recordSessionEvent(type: 'connect' | 'disconnect', sessionId: string): void {
-    const event: MonitorEvent = {
+    this.emit({
       event: `session_${type}`,
       data: { sessionId },
       timestamp: new Date().toISOString(),
-    }
-    this.emit(event)
+    })
   }
 
   private handleRequest(req: http.IncomingMessage, res: http.ServerResponse): void {
@@ -182,14 +168,20 @@ export class MonitorServer {
     res.write(':ok\n\n')
 
     this.sseClients.add(res)
-    res.on('close', () => this.sseClients.delete(res))
-    res.on('error', () => this.sseClients.delete(res))
+    const cleanup = () => this.sseClients.delete(res)
+    res.on('close', cleanup)
+    res.on('error', cleanup)
   }
 
   private emit(event: MonitorEvent): void {
+    if (this.sseClients.size === 0) return
     const line = `data: ${JSON.stringify(event)}\n\n`
     for (const res of this.sseClients) {
-      res.write(line)
+      try {
+        res.write(line)
+      } catch {
+        this.sseClients.delete(res)
+      }
     }
   }
 

@@ -7,6 +7,7 @@ import type {
   PluginMessage,
   RegisterMsg,
   Session,
+  SessionSnapshot,
   ToolCallHandler,
   ToolCallMsg,
   UnregisterMsg,
@@ -48,12 +49,7 @@ export class IpcServer {
     this.server = null
   }
 
-  getSessionSnapshots(): Array<{
-    sessionId: string
-    channels: string[]
-    handleDMs: boolean
-    connectedAt: number
-  }> {
+  getSessionSnapshots(): SessionSnapshot[] {
     return [...this.sessions.values()].map((s) => ({
       sessionId: s.sessionId,
       channels: [...s.channels],

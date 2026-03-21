@@ -115,6 +115,13 @@ export type Session = {
   connectedAt: number
 }
 
+export type SessionSnapshot = {
+  sessionId: string
+  channels: string[]
+  handleDMs: boolean
+  connectedAt: number
+}
+
 // ─── Platform Adapter ───
 
 export type GateResult =

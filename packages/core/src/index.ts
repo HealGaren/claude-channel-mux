@@ -18,7 +18,6 @@ export {
   type MonitorEvent,
   MonitorServer,
   type RequestLogEntry,
-  type SessionSnapshot,
   type StatusProvider,
 } from './monitor.js'
 export { RingBuffer } from './ring-buffer.js'
@@ -37,6 +36,7 @@ export type {
   RegisterAckMsg,
   RegisterMsg,
   Session,
+  SessionSnapshot,
   ShutdownMsg,
   ToolCallHandler,
   ToolCallMsg,

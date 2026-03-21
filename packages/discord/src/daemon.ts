@@ -36,7 +36,6 @@ async function main() {
 
   const adapter = new DiscordAdapter()
 
-  // Monitor setup (optional, enabled via MONITOR_PORT env var)
   const monitorPort = process.env.MONITOR_PORT
     ? Number.parseInt(process.env.MONITOR_PORT, 10)
     : null
@@ -76,35 +75,40 @@ async function main() {
 
   ipc.onToolCall(async (tool, args) => {
     dbg('tool_call', tool, Object.keys(args as Record<string, unknown>))
-    let result: Record<string, unknown>
-    switch (tool) {
-      case 'reply':
-        result = await adapter.reply(args as Parameters<typeof adapter.reply>[0])
-        break
-      case 'react':
-        await adapter.react(args as Parameters<typeof adapter.react>[0])
-        result = { result: 'ok' }
-        break
-      case 'edit_message':
-        result = await adapter.editMessage(args as Parameters<typeof adapter.editMessage>[0])
-        break
-      case 'fetch_messages': {
-        const fetchResult = await adapter.fetchMessages(
-          args as Parameters<typeof adapter.fetchMessages>[0],
-        )
-        result = { result: fetchResult }
-        break
+    try {
+      let result: Record<string, unknown>
+      switch (tool) {
+        case 'reply':
+          result = await adapter.reply(args as Parameters<typeof adapter.reply>[0])
+          break
+        case 'react':
+          await adapter.react(args as Parameters<typeof adapter.react>[0])
+          result = { result: 'ok' }
+          break
+        case 'edit_message':
+          result = await adapter.editMessage(args as Parameters<typeof adapter.editMessage>[0])
+          break
+        case 'fetch_messages': {
+          const fetchResult = await adapter.fetchMessages(
+            args as Parameters<typeof adapter.fetchMessages>[0],
+          )
+          result = { result: fetchResult }
+          break
+        }
+        case 'download_attachment':
+          result = await adapter.downloadAttachment(
+            args as Parameters<typeof adapter.downloadAttachment>[0],
+          )
+          break
+        default:
+          throw new Error(`unknown tool: ${tool}`)
       }
-      case 'download_attachment':
-        result = await adapter.downloadAttachment(
-          args as Parameters<typeof adapter.downloadAttachment>[0],
-        )
-        break
-      default:
-        throw new Error(`unknown tool: ${tool}`)
+      monitor?.recordToolCall(tool, args, true)
+      return result
+    } catch (err) {
+      monitor?.recordToolCall(tool, args, false)
+      throw err
     }
-    monitor?.recordToolCall(tool, args, true)
-    return result
   })
 
   await adapter.connect(token)
