@@ -89,8 +89,8 @@ describe('smoke tests', () => {
     expect(result).toContain('chunk')
   })
 
-  it('channel-mux status command works', () => {
-    const result = run('node packages/cli/dist/cli.mjs status')
+  it('channel-mux daemon status command works', () => {
+    const result = run('node packages/cli/dist/cli.mjs daemon status')
     expect(result).toContain('channel-mux daemon')
   })
 

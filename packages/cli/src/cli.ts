@@ -80,117 +80,117 @@ function resolveDaemonCommand(): { runner: string; args: string[] } {
 const command = process.argv[2]
 
 switch (command) {
-  case 'start': {
-    const verbose = process.argv.includes('--verbose')
-
-    const pid = readPid()
-    if (pid && isProcessAlive(pid)) {
-      console.log(`channel-mux daemon already running (pid ${pid})`)
-      process.exit(0)
-    }
-
-    if (pid && !isProcessAlive(pid)) {
-      cleanupStateFiles()
-    }
-
-    const logPath = join(STATE_DIR, 'daemon.log')
-    const { runner, args: runnerArgs } = resolveDaemonCommand()
-
-    mkdirSync(STATE_DIR, { recursive: true })
-    let logFd: number
-    try {
-      logFd = openSync(logPath, 'a')
-    } catch {
-      console.error(`channel-mux: cannot open log file: ${logPath}`)
-      process.exit(1)
-    }
-
-    const child = spawn(runner, runnerArgs, {
-      stdio: ['ignore', 'ignore', logFd],
-      detached: true,
-      env: {
-        ...process.env,
-        ...(verbose ? { CHANNEL_MUX_DEBUG: '1' } : {}),
-      },
-    })
-    child.unref()
-    closeSync(logFd)
-
-    // Wait briefly for PID file
-    await new Promise((r) => setTimeout(r, 2000))
-
-    const newPid = readPid()
-    if (newPid && isProcessAlive(newPid)) {
-      console.log(`channel-mux daemon started (pid ${newPid})`)
-      console.log(`  log: ${logPath}`)
-      if (verbose) console.log('  verbose logging enabled')
-    } else {
-      console.error('channel-mux: daemon failed to start. Check daemon.log')
-      process.exit(1)
-    }
-    break
-  }
-
-  case 'stop': {
-    const pid = readPid()
-    if (!pid || !isProcessAlive(pid)) {
-      console.log('channel-mux daemon is not running')
-      cleanupStateFiles()
-      process.exit(0)
-    }
-
-    process.kill(pid, 'SIGTERM')
-
-    // Wait for graceful shutdown (up to 5s)
-    let stopped = false
-    for (let i = 0; i < 50; i++) {
-      await new Promise((r) => setTimeout(r, 100))
-      if (!isProcessAlive(pid)) {
-        stopped = true
-        break
-      }
-    }
-
-    if (!stopped) {
-      process.stderr.write('channel-mux: SIGTERM timeout, sending SIGKILL\n')
-      try {
-        process.kill(pid, 'SIGKILL')
-      } catch (err) {
-        process.stderr.write(`channel-mux: SIGKILL failed: ${err}\n`)
-      }
-    }
-
-    cleanupStateFiles()
-    console.log('channel-mux daemon stopped')
-    break
-  }
-
-  case 'status': {
-    const pid = readPid()
-    const sockExists = existsSync(SOCK_PATH)
-
-    if (pid && isProcessAlive(pid)) {
-      console.log(`channel-mux daemon: running (pid ${pid})`)
-      console.log(`  socket: ${SOCK_PATH} (${sockExists ? 'exists' : 'missing'})`)
-      console.log(`  state: ${STATE_DIR}`)
-      try {
-        const port = readFileSync(MONITOR_PORT_FILE, 'utf8').trim()
-        console.log(`  monitor: http://127.0.0.1:${port}`)
-      } catch {
-        // monitor not enabled
-      }
-    } else {
-      console.log('channel-mux daemon: stopped')
-      if (pid) console.log(`  stale pid file: ${PID_FILE}`)
-      if (sockExists) console.log(`  stale socket: ${SOCK_PATH}`)
-    }
-    break
-  }
-
   case 'daemon': {
     const daemonSub = process.argv[3]
 
     switch (daemonSub) {
+      case 'start': {
+        const verbose = process.argv.includes('--verbose')
+
+        const pid = readPid()
+        if (pid && isProcessAlive(pid)) {
+          console.log(`channel-mux daemon already running (pid ${pid})`)
+          process.exit(0)
+        }
+
+        if (pid && !isProcessAlive(pid)) {
+          cleanupStateFiles()
+        }
+
+        const logPath = join(STATE_DIR, 'daemon.log')
+        const { runner, args: runnerArgs } = resolveDaemonCommand()
+
+        mkdirSync(STATE_DIR, { recursive: true })
+        let logFd: number
+        try {
+          logFd = openSync(logPath, 'a')
+        } catch {
+          console.error(`channel-mux: cannot open log file: ${logPath}`)
+          process.exit(1)
+        }
+
+        const child = spawn(runner, runnerArgs, {
+          stdio: ['ignore', 'ignore', logFd],
+          detached: true,
+          env: {
+            ...process.env,
+            ...(verbose ? { CHANNEL_MUX_DEBUG: '1' } : {}),
+          },
+        })
+        child.unref()
+        closeSync(logFd)
+
+        // Wait briefly for PID file
+        await new Promise((r) => setTimeout(r, 2000))
+
+        const newPid = readPid()
+        if (newPid && isProcessAlive(newPid)) {
+          console.log(`channel-mux daemon started (pid ${newPid})`)
+          console.log(`  log: ${logPath}`)
+          if (verbose) console.log('  verbose logging enabled')
+        } else {
+          console.error('channel-mux: daemon failed to start. Check daemon.log')
+          process.exit(1)
+        }
+        break
+      }
+
+      case 'stop': {
+        const pid = readPid()
+        if (!pid || !isProcessAlive(pid)) {
+          console.log('channel-mux daemon is not running')
+          cleanupStateFiles()
+          process.exit(0)
+        }
+
+        process.kill(pid, 'SIGTERM')
+
+        // Wait for graceful shutdown (up to 5s)
+        let stopped = false
+        for (let i = 0; i < 50; i++) {
+          await new Promise((r) => setTimeout(r, 100))
+          if (!isProcessAlive(pid)) {
+            stopped = true
+            break
+          }
+        }
+
+        if (!stopped) {
+          process.stderr.write('channel-mux: SIGTERM timeout, sending SIGKILL\n')
+          try {
+            process.kill(pid, 'SIGKILL')
+          } catch (err) {
+            process.stderr.write(`channel-mux: SIGKILL failed: ${err}\n`)
+          }
+        }
+
+        cleanupStateFiles()
+        console.log('channel-mux daemon stopped')
+        break
+      }
+
+      case 'status': {
+        const pid = readPid()
+        const sockExists = existsSync(SOCK_PATH)
+
+        if (pid && isProcessAlive(pid)) {
+          console.log(`channel-mux daemon: running (pid ${pid})`)
+          console.log(`  socket: ${SOCK_PATH} (${sockExists ? 'exists' : 'missing'})`)
+          console.log(`  state: ${STATE_DIR}`)
+          try {
+            const port = readFileSync(MONITOR_PORT_FILE, 'utf8').trim()
+            console.log(`  monitor: http://127.0.0.1:${port}`)
+          } catch {
+            // monitor not enabled
+          }
+        } else {
+          console.log('channel-mux daemon: stopped')
+          if (pid) console.log(`  stale pid file: ${PID_FILE}`)
+          if (sockExists) console.log(`  stale socket: ${SOCK_PATH}`)
+        }
+        break
+      }
+
       case 'group': {
         const groupSub = process.argv[4]
         const groupArgs = process.argv.slice(5)
@@ -278,10 +278,13 @@ switch (command) {
       }
 
       default:
-        console.log('Usage: channel-mux daemon <group>')
+        console.log('Usage: channel-mux daemon <start|stop|status|group>')
         console.log('')
         console.log('Commands:')
-        console.log('  group <sub>   Manage daemon channel reception')
+        console.log('  start [--verbose]   Start the daemon')
+        console.log('  stop                Stop the daemon')
+        console.log('  status              Show daemon status')
+        console.log('  group <sub>         Manage daemon channel reception')
         process.exit(1)
     }
     break
@@ -332,13 +335,10 @@ switch (command) {
   }
 
   default:
-    console.log('Usage: channel-mux <start|stop|status|daemon|session>')
+    console.log('Usage: channel-mux <daemon|session>')
     console.log('')
     console.log('Commands:')
-    console.log('  start [--verbose]   Start the daemon (--verbose enables debug logs)')
-    console.log('  stop                Stop the daemon')
-    console.log('  status              Show daemon status')
-    console.log('  daemon <sub>        Manage daemon settings')
-    console.log('  session             Show session routing config')
+    console.log('  daemon <sub>   Manage the daemon (start, stop, status, group)')
+    console.log('  session        Show session routing config')
     process.exit(1)
 }
