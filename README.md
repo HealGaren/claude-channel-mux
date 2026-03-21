@@ -72,8 +72,8 @@ echo "DISCORD_BOT_TOKEN=your_token_here" > ~/.claude/channels/channel-mux/.env
 ### 4. Start the daemon
 
 ```bash
-channel-mux start
-channel-mux status   # verify it's running
+channel-mux daemon start
+channel-mux daemon status   # verify it's running
 ```
 
 ### 5. Install the plugin
@@ -90,20 +90,30 @@ In a Claude Code session, install the plugin from the custom marketplace:
 
 The plugin ships with `.mcp.json`, so the MCP server is configured automatically.
 
-### 6. Start Claude Code with channels enabled
+### 6. Configure channels
 
-The simplest way is to pass the channel ID and DM handling as environment variables:
+Add channels to the daemon and configure session routing:
 
 ```bash
-CHANNEL_MUX_CHANNELS=YOUR_CHANNEL_ID CHANNEL_MUX_HANDLE_DMS=true \
-  claude --dangerously-load-development-channels server:channel-mux
+# Allow the daemon to receive from your channel
+channel-mux daemon group add YOUR_CHANNEL_ID
+
+# Set which channels this session routes (writes to .mcp.json)
+channel-mux session channels YOUR_CHANNEL_ID
+channel-mux session dms true
 ```
 
-> You can also set these in `.mcp.json` (project-level or `~/.claude/.mcp.json`) env block. See the [Plugin Installation Guide](docs/guides/plugin-install.md) for details.
+> **Tip**: Get a channel ID by enabling Developer Mode in Discord settings, then right-clicking a channel > "Copy Channel ID". Multiple IDs can be space-separated.
+
+### 7. Start Claude Code with channels enabled
+
+```bash
+claude --dangerously-load-development-channels server:channel-mux
+```
 
 > **Warning**: The `--dangerously-load-development-channels` flag loads channel plugins that are NOT from the official Anthropic marketplace. Only official Anthropic channels can run without this flag. Do not use this flag if you do not understand what it does -- it allows third-party code to inject messages into your Claude session.
 
-### 7. Start chatting
+### 8. Start chatting
 
 Send a DM to your bot. It will respond with a pairing code. In your terminal:
 
@@ -113,15 +123,24 @@ Send a DM to your bot. It will respond with a pairing code. In your terminal:
 
 You're paired. Messages now flow to your Claude session.
 
-> **Tip**: Get a channel ID by enabling Developer Mode in Discord settings, then right-clicking a channel > "Copy Channel ID".
-
 ## CLI Reference
 
 ```bash
-channel-mux start    # Start daemon in background
-channel-mux stop     # Stop daemon (SIGTERM -> SIGKILL)
-channel-mux status   # Check if daemon is running
+# Daemon management
+channel-mux daemon start [--verbose]   # Start daemon in background
+channel-mux daemon stop                # Stop daemon (SIGTERM -> SIGKILL)
+channel-mux daemon status              # Check if daemon is running
+channel-mux daemon group add <id> ...  # Add channels to daemon reception
+channel-mux daemon group rm <id> ...   # Remove channels
+channel-mux daemon group list          # List configured channels
+
+# Session routing
+channel-mux session                            # View current config
+channel-mux session channels <id> [...]        # Set channel IDs
+channel-mux session dms <true|false>           # Set DM handling
 ```
+
+> `session channels` and `session dms` accept `--scope=local|project|user` to choose which `.mcp.json` to write (default: `local`).
 
 ## Configuration
 
@@ -229,7 +248,7 @@ packages/
       utils.ts           # chunk(), assertSendable(), safeAttName()
   cli/                 @claude-channel-mux/cli
     src/
-      cli.ts             # CLI (start/stop/status)
+      cli.ts             # CLI (daemon, session)
 ```
 
 ## Development

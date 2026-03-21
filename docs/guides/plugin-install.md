@@ -10,7 +10,7 @@ How to install and use claude-channel-mux as a Claude Code channel plugin.
 - claude.ai account (Console/API key auth not supported for channels)
 - Discord bot set up (see [Discord Setup Guide](./discord-setup.md))
 - Bot token configured (`~/.claude/channels/channel-mux/.env`)
-- Daemon running (`channel-mux start`)
+- Daemon running (`channel-mux daemon start`)
 
 ## Install from marketplace (recommended)
 
@@ -30,22 +30,30 @@ In your Claude Code terminal:
 
 The plugin ships with `.mcp.json`, so the MCP server is configured automatically.
 
-### 2. Start Claude Code with channels enabled
-
-Pass channel configuration as environment variables and start Claude Code:
+### 2. Configure channels
 
 ```bash
-CHANNEL_MUX_CHANNELS=YOUR_CHANNEL_ID CHANNEL_MUX_HANDLE_DMS=true \
-  claude --dangerously-load-development-channels server:channel-mux
+# Allow the daemon to receive from your channel
+channel-mux daemon group add YOUR_CHANNEL_ID
+
+# Set which channels this session routes
+channel-mux session channels YOUR_CHANNEL_ID
+channel-mux session dms true
+```
+
+> `channel-mux session` writes to `.mcp.json`. Use `--scope=local|project|user` to choose which file (default: `local`).
+
+### 3. Start Claude Code with channels enabled
+
+```bash
+claude --dangerously-load-development-channels server:channel-mux
 ```
 
 > `server:channel-mux` refers to the MCP server name defined in the plugin's `.mcp.json`.
 
-You can also set these variables permanently in `.mcp.json` (project-level or `~/.claude/.mcp.json`) under the `env` block. See the [MCP Configuration Guide](./mcp-config.md) for details.
-
 > **Warning**: The `--dangerously-load-development-channels` flag loads channel plugins that are NOT from the official Anthropic marketplace. Only official Anthropic channels can run without this flag. This flag allows third-party code to inject messages into your Claude session. Do not use it if you do not understand the implications.
 
-### 3. Verify the connection
+### 4. Verify the connection
 
 1. Check daemon logs: `tail -f ~/.claude/channels/channel-mux/daemon.log`
 2. You should see: `channel-mux ipc: session <id> registered`
@@ -106,7 +114,7 @@ pnpm run build
 ```bash
 pnpm run dev          # foreground with watch mode
 # or
-node packages/cli/dist/cli.mjs start   # background
+node packages/cli/dist/cli.mjs daemon start   # background
 ```
 
 ### 3. Configure .mcp.json
@@ -190,7 +198,7 @@ You started Claude Code without `--channels` or `--dangerously-load-development-
 ### "cannot connect to daemon"
 The daemon isn't running. Start it:
 ```bash
-channel-mux start
+channel-mux daemon start
 ```
 
 ### "channel already claimed by another session"
