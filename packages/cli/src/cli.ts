@@ -187,85 +187,101 @@ switch (command) {
     break
   }
 
-  case 'group': {
-    const sub = process.argv[3]
-    const groupArgs = process.argv.slice(4)
-    const channelIds = groupArgs.filter((a) => !a.startsWith('-'))
+  case 'daemon': {
+    const daemonSub = process.argv[3]
 
-    switch (sub) {
-      case 'add': {
-        if (channelIds.length === 0) {
-          console.error('Usage: channel-mux group add <channelId> [channelId2 ...] [--no-mention]')
-          process.exit(1)
-        }
-        const noMention = groupArgs.includes('--no-mention')
-        const allowFlag = groupArgs.find((a) => a.startsWith('--allow='))
-        const allowFrom = allowFlag ? allowFlag.slice('--allow='.length).split(',') : []
-        mkdirSync(STATE_DIR, { recursive: true })
-        const access = readAccessFile()
-        const added: string[] = []
-        for (const id of channelIds) {
-          if (!access.groups[id]) {
-            access.groups[id] = { requireMention: !noMention, allowFrom }
-            added.push(id)
-          }
-        }
-        if (added.length > 0) {
-          saveAccess(access)
-          console.log(`Added ${added.length} channel(s): ${added.join(', ')}`)
-        } else {
-          console.log('All channels already configured')
-        }
-        break
-      }
+    switch (daemonSub) {
+      case 'group': {
+        const groupSub = process.argv[4]
+        const groupArgs = process.argv.slice(5)
+        const channelIds = groupArgs.filter((a) => !a.startsWith('-'))
 
-      case 'rm': {
-        if (channelIds.length === 0) {
-          console.error('Usage: channel-mux group rm <channelId> [channelId2 ...]')
-          process.exit(1)
-        }
-        const access = readAccessFile()
-        const removed: string[] = []
-        for (const id of channelIds) {
-          if (access.groups[id]) {
-            delete access.groups[id]
-            removed.push(id)
+        switch (groupSub) {
+          case 'add': {
+            if (channelIds.length === 0) {
+              console.error(
+                'Usage: channel-mux daemon group add <channelId> [channelId2 ...] [--no-mention]',
+              )
+              process.exit(1)
+            }
+            const noMention = groupArgs.includes('--no-mention')
+            const allowFlag = groupArgs.find((a) => a.startsWith('--allow='))
+            const allowFrom = allowFlag ? allowFlag.slice('--allow='.length).split(',') : []
+            mkdirSync(STATE_DIR, { recursive: true })
+            const access = readAccessFile()
+            const added: string[] = []
+            for (const id of channelIds) {
+              if (!access.groups[id]) {
+                access.groups[id] = { requireMention: !noMention, allowFrom }
+                added.push(id)
+              }
+            }
+            if (added.length > 0) {
+              saveAccess(access)
+              console.log(`Added ${added.length} channel(s): ${added.join(', ')}`)
+            } else {
+              console.log('All channels already configured')
+            }
+            break
           }
-        }
-        if (removed.length > 0) {
-          saveAccess(access)
-          console.log(`Removed ${removed.length} channel(s): ${removed.join(', ')}`)
-        } else {
-          console.log('None of the specified channels were configured')
-        }
-        break
-      }
 
-      case 'list': {
-        const access = readAccessFile()
-        const ids = Object.keys(access.groups)
-        if (ids.length === 0) {
-          console.log('No channels configured')
-        } else {
-          console.log(`Configured channels (${ids.length}):`)
-          for (const id of ids) {
-            const g = access.groups[id]
-            const flags = []
-            if (g.requireMention) flags.push('mention-required')
-            if (g.allowFrom.length > 0) flags.push(`allow: ${g.allowFrom.join(',')}`)
-            console.log(`  ${id}${flags.length > 0 ? ` (${flags.join(', ')})` : ''}`)
+          case 'rm': {
+            if (channelIds.length === 0) {
+              console.error('Usage: channel-mux daemon group rm <channelId> [channelId2 ...]')
+              process.exit(1)
+            }
+            const access = readAccessFile()
+            const removed: string[] = []
+            for (const id of channelIds) {
+              if (access.groups[id]) {
+                delete access.groups[id]
+                removed.push(id)
+              }
+            }
+            if (removed.length > 0) {
+              saveAccess(access)
+              console.log(`Removed ${removed.length} channel(s): ${removed.join(', ')}`)
+            } else {
+              console.log('None of the specified channels were configured')
+            }
+            break
           }
+
+          case 'list': {
+            const access = readAccessFile()
+            const ids = Object.keys(access.groups)
+            if (ids.length === 0) {
+              console.log('No channels configured')
+            } else {
+              console.log(`Configured channels (${ids.length}):`)
+              for (const id of ids) {
+                const g = access.groups[id]
+                const flags = []
+                if (g.requireMention) flags.push('mention-required')
+                if (g.allowFrom.length > 0) flags.push(`allow: ${g.allowFrom.join(',')}`)
+                console.log(`  ${id}${flags.length > 0 ? ` (${flags.join(', ')})` : ''}`)
+              }
+            }
+            break
+          }
+
+          default:
+            console.log('Usage: channel-mux daemon group <add|rm|list>')
+            console.log('')
+            console.log('Commands:')
+            console.log('  add <channelId> [...]   Add channels [--no-mention] [--allow=id1,id2]')
+            console.log('  rm <channelId> [...]    Remove channels from daemon reception')
+            console.log('  list                    List configured channels')
+            process.exit(1)
         }
         break
       }
 
       default:
-        console.log('Usage: channel-mux group <add|rm|list>')
+        console.log('Usage: channel-mux daemon <group>')
         console.log('')
         console.log('Commands:')
-        console.log('  add <channelId> [...]   Add channels [--no-mention] [--allow=id1,id2]')
-        console.log('  rm <channelId> [...]    Remove channels from daemon reception')
-        console.log('  list                    List configured channels')
+        console.log('  group <sub>   Manage daemon channel reception')
         process.exit(1)
     }
     break
@@ -316,13 +332,13 @@ switch (command) {
   }
 
   default:
-    console.log('Usage: channel-mux <start|stop|status|group|session>')
+    console.log('Usage: channel-mux <start|stop|status|daemon|session>')
     console.log('')
     console.log('Commands:')
     console.log('  start [--verbose]   Start the daemon (--verbose enables debug logs)')
     console.log('  stop                Stop the daemon')
     console.log('  status              Show daemon status')
-    console.log('  group <sub>         Manage daemon channel reception')
+    console.log('  daemon <sub>        Manage daemon settings')
     console.log('  session             Show session routing config')
     process.exit(1)
 }

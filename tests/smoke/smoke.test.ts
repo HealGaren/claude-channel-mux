@@ -94,38 +94,38 @@ describe('smoke tests', () => {
     expect(result).toContain('channel-mux daemon')
   })
 
-  it('channel-mux group add/list/rm works', () => {
+  it('channel-mux daemon group add/list/rm works', () => {
     const fakeHome = join(TMP, 'fake-home')
     mkdirSync(join(fakeHome, '.claude', 'channels', 'channel-mux'), { recursive: true })
     const cli = `HOME=${fakeHome} node packages/cli/dist/cli.mjs`
 
-    const addResult = run(`${cli} group add 111 222 333`)
+    const addResult = run(`${cli} daemon group add 111 222 333`)
     expect(addResult).toContain('Added 3 channel(s)')
 
-    const addDupe = run(`${cli} group add 111 444`)
+    const addDupe = run(`${cli} daemon group add 111 444`)
     expect(addDupe).toContain('Added 1 channel(s)')
 
-    const listResult = run(`${cli} group list`)
+    const listResult = run(`${cli} daemon group list`)
     expect(listResult).toContain('111')
     expect(listResult).toContain('222')
     expect(listResult).toContain('444')
 
-    const rmResult = run(`${cli} group rm 222 333`)
+    const rmResult = run(`${cli} daemon group rm 222 333`)
     expect(rmResult).toContain('Removed 2 channel(s)')
 
-    const listAfter = run(`${cli} group list`)
+    const listAfter = run(`${cli} daemon group list`)
     expect(listAfter).toContain('111')
     expect(listAfter).toContain('444')
     expect(listAfter).not.toContain('222')
   })
 
-  it('channel-mux group add --no-mention sets requireMention false', () => {
+  it('channel-mux daemon group add --no-mention sets requireMention false', () => {
     const fakeHome = join(TMP, 'fake-home-mention')
     mkdirSync(join(fakeHome, '.claude', 'channels', 'channel-mux'), { recursive: true })
     const cli = `HOME=${fakeHome} node packages/cli/dist/cli.mjs`
 
-    run(`${cli} group add 555 --no-mention`)
-    const listResult = run(`${cli} group list`)
+    run(`${cli} daemon group add 555 --no-mention`)
+    const listResult = run(`${cli} daemon group list`)
     expect(listResult).toContain('555')
     expect(listResult).not.toContain('mention-required')
   })
