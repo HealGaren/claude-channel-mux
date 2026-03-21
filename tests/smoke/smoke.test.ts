@@ -1,5 +1,5 @@
 import { execSync } from 'node:child_process'
-import { existsSync, mkdirSync, readdirSync, rmSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
@@ -117,6 +117,57 @@ describe('smoke tests', () => {
     expect(listAfter).toContain('111')
     expect(listAfter).toContain('444')
     expect(listAfter).not.toContain('222')
+  })
+
+  it('channel-mux group add --no-mention sets requireMention false', () => {
+    const fakeHome = join(TMP, 'fake-home-mention')
+    mkdirSync(join(fakeHome, '.claude', 'channels', 'channel-mux'), { recursive: true })
+    const cli = `HOME=${fakeHome} node packages/cli/dist/cli.mjs`
+
+    run(`${cli} group add 555 --no-mention`)
+    const listResult = run(`${cli} group list`)
+    expect(listResult).toContain('555')
+    expect(listResult).not.toContain('mention-required')
+  })
+
+  it('channel-mux session shows env vars', () => {
+    const fakeHome = join(TMP, 'fake-home-session')
+    mkdirSync(join(fakeHome, '.claude', 'channels', 'channel-mux'), { recursive: true })
+    const cli = `HOME=${fakeHome} node packages/cli/dist/cli.mjs`
+
+    const envResult = run(
+      `CHANNEL_MUX_CHANNELS=111,222 CHANNEL_MUX_HANDLE_DMS=true ${cli} session`,
+    )
+    expect(envResult).toContain('env:')
+    expect(envResult).toContain('channels: 111,222')
+    expect(envResult).toContain('DMs: true')
+  })
+
+  it('channel-mux session shows .mcp.json config', () => {
+    const fakeHome = join(TMP, 'fake-home-session-mcp')
+    const fakeProject = join(TMP, 'fake-project')
+    mkdirSync(join(fakeHome, '.claude', 'channels', 'channel-mux'), { recursive: true })
+    mkdirSync(join(fakeProject, '.claude'), { recursive: true })
+    writeFileSync(
+      join(fakeProject, '.claude', '.mcp.json'),
+      JSON.stringify({
+        mcpServers: { 'channel-mux': { env: { CHANNEL_MUX_CHANNELS: '999' } } },
+      }),
+    )
+    const result = run(
+      `cd ${fakeProject} && HOME=${fakeHome} node ${join(ROOT, 'packages/cli/dist/cli.mjs')} session`,
+    )
+    expect(result).toContain('local')
+    expect(result).toContain('999')
+  })
+
+  it('channel-mux session shows no config message when empty', () => {
+    const fakeHome = join(TMP, 'fake-home-session-empty')
+    mkdirSync(join(fakeHome, '.claude', 'channels', 'channel-mux'), { recursive: true })
+    const cli = `HOME=${fakeHome} CHANNEL_MUX_CHANNELS= CHANNEL_MUX_HANDLE_DMS= node packages/cli/dist/cli.mjs`
+
+    const result = run(`${cli} session`)
+    expect(result).toContain('No channel-mux session config found')
   })
 
   it('channel-mux-plugin exits with correct error (no daemon)', () => {
