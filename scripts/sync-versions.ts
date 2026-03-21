@@ -24,3 +24,10 @@ for (const pkg of packages) {
   writeFileSync(pkgPath, `${JSON.stringify(pkgJson, null, 2)}\n`)
   process.stderr.write(`sync-versions: ${pkgJson.name} -> ${version}\n`)
 }
+
+// Sync plugin.json version (used by Claude Code for update detection)
+const pluginJsonPath = join(ROOT, 'packages', 'discord', '.claude-plugin', 'plugin.json')
+const pluginJson = JSON.parse(readFileSync(pluginJsonPath, 'utf8'))
+pluginJson.version = version
+writeFileSync(pluginJsonPath, `${JSON.stringify(pluginJson, null, 2)}\n`)
+process.stderr.write(`sync-versions: plugin.json -> ${version}\n`)

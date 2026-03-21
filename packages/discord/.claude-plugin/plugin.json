@@ -1,5 +1,6 @@
 {
   "name": "channel-mux",
+  "version": "0.1.0-alpha.3",
   "description": "Multiplexed Discord channel for Claude Code -- routes messages from a shared bot to multiple sessions.",
   "mcpServers": {
     "channel-mux": {
