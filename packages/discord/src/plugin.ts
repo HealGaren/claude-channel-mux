@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { randomUUID } from 'node:crypto'
 import { createRequire } from 'node:module'
-import { IpcClient, SOCK_PATH } from '@claude-channel-mux/core'
+import { createDebug, IpcClient, SOCK_PATH } from '@claude-channel-mux/core'
 
 const require = createRequire(import.meta.url)
 const { version } = require('../package.json') as { version: string }
@@ -9,6 +9,8 @@ const { version } = require('../package.json') as { version: string }
 import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
+
+const dbg = createDebug('mux:plugin')
 
 const sessionId = randomUUID()
 
@@ -129,6 +131,7 @@ mcp.setRequestHandler(ListToolsRequestSchema, async () => ({
 }))
 
 mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
+  dbg('tool_call', req.params.name)
   const args = (req.params.arguments ?? {}) as Record<string, unknown>
   try {
     const result = await ipc.toolCall(sessionId, req.params.name, args)
@@ -162,6 +165,9 @@ ipc.onInbound((msg) => {
     meta.attachments = atts
       .map((a) => `${a.name} (${a.contentType}, ${Math.round(a.size / 1024)}KB)`)
       .join('; ')
+  }
+  if (dbg.enabled) {
+    dbg('notify', `channel=${msg.channelId}`, `message=${msg.messageId}`, `user=${msg.username}`)
   }
   void mcp.notification({
     method: 'notifications/claude/channel',

@@ -1,5 +1,6 @@
 import { unlinkSync } from 'node:fs'
 import net from 'node:net'
+import { createDebug } from './debug.js'
 import type {
   DaemonMessage,
   InboundMsg,
@@ -10,6 +11,8 @@ import type {
   ToolCallMsg,
   UnregisterMsg,
 } from './types.js'
+
+const dbg = createDebug('mux:ipc-server')
 
 export class IpcServer {
   private server: net.Server | null = null
@@ -62,11 +65,20 @@ export class IpcServer {
       sessionId = this.channelToSession.get(msg.channelId)
     }
 
-    if (!sessionId) return false
+    if (!sessionId) {
+      dbg(
+        'routeInbound miss',
+        `channel=${msg.channelId}`,
+        `isDM=${msg.isDM}`,
+        `registered=[${[...this.channelToSession.keys()].join(', ')}]`,
+      )
+      return false
+    }
 
     const session = this.sessions.get(sessionId)
     if (!session) return false
 
+    dbg('routeInbound hit', `channel=${msg.channelId}`, `-> session ${sessionId}`)
     this.send(session.socket, msg)
     return true
   }

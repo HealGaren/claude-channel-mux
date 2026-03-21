@@ -1,7 +1,16 @@
 #!/usr/bin/env node
 import { mkdirSync, unlinkSync, writeFileSync } from 'node:fs'
-import { IpcServer, loadEnvFile, PID_FILE, SOCK_PATH, STATE_DIR } from '@claude-channel-mux/core'
+import {
+  createDebug,
+  IpcServer,
+  loadEnvFile,
+  PID_FILE,
+  SOCK_PATH,
+  STATE_DIR,
+} from '@claude-channel-mux/core'
 import { DiscordAdapter } from './adapter.js'
+
+const dbg = createDebug('mux:daemon')
 
 async function main() {
   loadEnvFile()
@@ -24,10 +33,19 @@ async function main() {
   const adapter = new DiscordAdapter()
 
   adapter.onMessage((msg) => {
-    ipc.routeInbound(msg)
+    const routed = ipc.routeInbound(msg)
+    if (dbg.enabled) {
+      dbg(
+        routed ? 'routed' : 'dropped (no matching session)',
+        `channel=${msg.channelId}`,
+        `user=${msg.username}`,
+        `isDM=${msg.isDM}`,
+      )
+    }
   })
 
   ipc.onToolCall(async (tool, args) => {
+    dbg('tool_call', tool, Object.keys(args as Record<string, unknown>))
     switch (tool) {
       case 'reply':
         return adapter.reply(args as Parameters<typeof adapter.reply>[0])
