@@ -189,7 +189,8 @@ switch (command) {
 
   case 'group': {
     const sub = process.argv[3]
-    const channelIds = process.argv.slice(4).filter((a) => !a.startsWith('-'))
+    const groupArgs = process.argv.slice(4)
+    const channelIds = groupArgs.filter((a) => !a.startsWith('-'))
 
     switch (sub) {
       case 'add': {
@@ -197,13 +198,15 @@ switch (command) {
           console.error('Usage: channel-mux group add <channelId> [channelId2 ...] [--no-mention]')
           process.exit(1)
         }
-        const noMention = process.argv.includes('--no-mention')
+        const noMention = groupArgs.includes('--no-mention')
+        const allowFlag = groupArgs.find((a) => a.startsWith('--allow='))
+        const allowFrom = allowFlag ? allowFlag.slice('--allow='.length).split(',') : []
         mkdirSync(STATE_DIR, { recursive: true })
         const access = readAccessFile()
         const added: string[] = []
         for (const id of channelIds) {
           if (!access.groups[id]) {
-            access.groups[id] = { requireMention: !noMention, allowFrom: [] }
+            access.groups[id] = { requireMention: !noMention, allowFrom }
             added.push(id)
           }
         }
@@ -260,7 +263,7 @@ switch (command) {
         console.log('Usage: channel-mux group <add|rm|list>')
         console.log('')
         console.log('Commands:')
-        console.log('  add <channelId> [...]   Add channels to daemon reception [--no-mention]')
+        console.log('  add <channelId> [...]   Add channels [--no-mention] [--allow=id1,id2]')
         console.log('  rm <channelId> [...]    Remove channels from daemon reception')
         console.log('  list                    List configured channels')
         process.exit(1)
