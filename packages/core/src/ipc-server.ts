@@ -7,6 +7,7 @@ import type {
   PluginMessage,
   RegisterMsg,
   Session,
+  SessionSnapshot,
   ToolCallHandler,
   ToolCallMsg,
   UnregisterMsg,
@@ -48,6 +49,15 @@ export class IpcServer {
     this.server = null
   }
 
+  getSessionSnapshots(): SessionSnapshot[] {
+    return [...this.sessions.values()].map((s) => ({
+      sessionId: s.sessionId,
+      channels: [...s.channels],
+      handleDMs: s.handleDMs,
+      connectedAt: s.connectedAt,
+    }))
+  }
+
   setBotUsername(name: string): void {
     this.botUsername = name
   }
@@ -56,7 +66,7 @@ export class IpcServer {
     this.toolCallHandler = handler
   }
 
-  routeInbound(msg: InboundMsg): boolean {
+  routeInbound(msg: InboundMsg): string | null {
     let sessionId: string | undefined
 
     if (msg.isDM) {
@@ -72,15 +82,15 @@ export class IpcServer {
         `isDM=${msg.isDM}`,
         `registered=[${[...this.channelToSession.keys()].join(', ')}]`,
       )
-      return false
+      return null
     }
 
     const session = this.sessions.get(sessionId)
-    if (!session) return false
+    if (!session) return null
 
     dbg('routeInbound hit', `channel=${msg.channelId}`, `-> session ${sessionId}`)
     this.send(session.socket, msg)
-    return true
+    return sessionId
   }
 
   broadcastShutdown(): void {
@@ -170,6 +180,7 @@ export class IpcServer {
       socket,
       channels: new Set(msg.channels),
       handleDMs: msg.handleDMs,
+      connectedAt: existing?.connectedAt ?? Date.now(),
     }
 
     this.sessions.set(msg.sessionId, session)

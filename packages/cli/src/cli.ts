@@ -2,7 +2,7 @@
 import { execSync, spawn } from 'node:child_process'
 import { closeSync, existsSync, mkdirSync, openSync, readFileSync, unlinkSync } from 'node:fs'
 import { join } from 'node:path'
-import { PID_FILE, SOCK_PATH, STATE_DIR } from '@claude-channel-mux/core'
+import { MONITOR_PORT_FILE, PID_FILE, SOCK_PATH, STATE_DIR } from '@claude-channel-mux/core'
 
 function isProcessAlive(pid: number): boolean {
   try {
@@ -28,6 +28,9 @@ function cleanupStateFiles(): void {
   } catch {}
   try {
     unlinkSync(SOCK_PATH)
+  } catch {}
+  try {
+    unlinkSync(MONITOR_PORT_FILE)
   } catch {}
 }
 
@@ -169,6 +172,12 @@ switch (command) {
       console.log(`channel-mux daemon: running (pid ${pid})`)
       console.log(`  socket: ${SOCK_PATH} (${sockExists ? 'exists' : 'missing'})`)
       console.log(`  state: ${STATE_DIR}`)
+      try {
+        const port = readFileSync(MONITOR_PORT_FILE, 'utf8').trim()
+        console.log(`  monitor: http://127.0.0.1:${port}`)
+      } catch {
+        // monitor not enabled
+      }
     } else {
       console.log('channel-mux daemon: stopped')
       if (pid) console.log(`  stale pid file: ${PID_FILE}`)

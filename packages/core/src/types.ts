@@ -112,6 +112,14 @@ export type Session = {
   socket: Socket
   channels: Set<string>
   handleDMs: boolean
+  connectedAt: number
+}
+
+export type SessionSnapshot = {
+  sessionId: string
+  channels: string[]
+  handleDMs: boolean
+  connectedAt: number
 }
 
 // ─── Platform Adapter ───

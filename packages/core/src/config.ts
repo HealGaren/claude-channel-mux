@@ -9,6 +9,7 @@ export const PID_FILE = join(STATE_DIR, 'daemon.pid')
 export const SOCK_PATH = join(STATE_DIR, 'daemon.sock')
 export const INBOX_DIR = join(STATE_DIR, 'inbox')
 export const APPROVED_DIR = join(STATE_DIR, 'approved')
+export const MONITOR_PORT_FILE = join(STATE_DIR, 'monitor.port')
 
 const ENV_LINE = /^(\w+)=(.*)$/
 
