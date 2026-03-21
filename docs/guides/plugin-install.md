@@ -182,8 +182,8 @@ Then in Claude Code:
 If `CHANNEL_MUX_HANDLE_DMS` is `true` and someone DMs the bot for the first time:
 
 1. The bot sends a 6-character pairing code in the DM
-2. In your Claude Code terminal, run: `/channel-mux:access pair <code>`
-3. Lock down access: `/channel-mux:access policy allowlist`
+2. In your Claude Code terminal, run: `/channel-mux:daemon pair <code>`
+3. Lock down access: `/channel-mux:daemon policy allowlist`
 4. The user is now paired and can chat with Claude through DMs
 
 ## Environment variables
@@ -218,4 +218,4 @@ Your Team/Enterprise admin needs to enable channels. See [Enterprise controls](h
 ### Bot doesn't respond to DMs
 - Make sure Claude Code is running with `--channels` or `--dangerously-load-development-channels`
 - Check daemon log: `tail -f ~/.claude/channels/channel-mux/daemon.log`
-- Check access policy: `/channel-mux:access`
+- Check access policy: `/channel-mux:daemon`

@@ -1,5 +1,5 @@
 ---
-name: config
+name: session
 description: Configure channel-mux session routing -- set which Discord channels this session receives. Use when the user wants to configure channels for their session.
 user-invocable: true
 allowed-tools:
@@ -7,7 +7,7 @@ allowed-tools:
   - Write
 ---
 
-# /channel-mux:config -- Session Configuration
+# /channel-mux:session -- Session Configuration
 
 Configures session-level settings for channel-mux. Currently supports setting
 which Discord channels this Claude session receives messages from.

@@ -145,7 +145,7 @@ If running from the monorepo source with tsx:
 Send a DM to your bot. It will respond with a pairing code. In your terminal:
 
 ```
-/channel-mux:access pair <code>
+/channel-mux:daemon pair <code>
 ```
 
 You're paired. Messages now flow to your Claude session.
@@ -172,14 +172,14 @@ All state lives in `~/.claude/channels/channel-mux/`:
 
 ### Access control
 
-Managed via the `/channel-mux:access` skill in your Claude terminal:
+Managed via the `/channel-mux:daemon` skill in your Claude terminal:
 
 ```bash
-/channel-mux:access                    # Show current status
-/channel-mux:access pair <code>        # Approve a pairing
-/channel-mux:access allow <userId>     # Add user to allowlist
-/channel-mux:access policy allowlist   # Switch DM policy
-/channel-mux:access group add <chId>   # Add a guild channel
+/channel-mux:daemon                    # Show current status
+/channel-mux:daemon pair <code>        # Approve a pairing
+/channel-mux:daemon allow <userId>     # Add user to allowlist
+/channel-mux:daemon policy allowlist   # Switch DM policy
+/channel-mux:daemon group add <chId>   # Add a guild channel
 ```
 
 ### Environment variables (plugin)
@@ -221,7 +221,7 @@ interface PlatformAdapter {
 
 ### Security Model
 
-- **Access mutations are terminal-only** -- the `/channel-mux:access` skill only runs from the user's terminal, never triggered by channel messages
+- **Access mutations are terminal-only** -- the `/channel-mux:daemon` skill only runs from the user's terminal, never triggered by channel messages
 - **Outbound gate** -- bot can only send to channels listed in `access.json`
 - **File path security** -- `assertSendable()` blocks sending state directory files (except inbox)
 - **Attachment sanitization** -- filenames are stripped of injection characters
