@@ -1,7 +1,7 @@
 import { mkdirSync, statSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { GateResult, InboundMsg, PlatformAdapter } from '@claude-channel-mux/core'
-import { INBOX_DIR } from '@claude-channel-mux/core'
+import { createDebug, INBOX_DIR } from '@claude-channel-mux/core'
 import {
   AttachmentBuilder,
   ChannelType,
@@ -25,6 +25,8 @@ import {
 } from './utils.js'
 
 type SendableChannel = TextChannel | DMChannel | ThreadChannel
+
+const dbg = createDebug('mux:discord')
 
 export class DiscordAdapter implements PlatformAdapter {
   name = 'discord'
@@ -227,6 +229,7 @@ export class DiscordAdapter implements PlatformAdapter {
     if (msg.author.bot) return
 
     const gateResult = await this.gate({ platform: 'discord', raw: msg })
+    dbg('gate', `channel=${msg.channelId}`, `user=${msg.author.id}`, `action=${gateResult.action}`)
 
     if (gateResult.action === 'pair') {
       await this.sendPairingCode(msg.channelId, gateResult.code, gateResult.isResend)

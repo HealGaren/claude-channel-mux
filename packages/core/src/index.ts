@@ -8,6 +8,7 @@ export {
   SOCK_PATH,
   STATE_DIR,
 } from './config.js'
+export { createDebug } from './debug.js'
 export { evaluateGate, type GateInput } from './gate.js'
 export { DEFAULT_REQUEST_TIMEOUT_MS, IpcClient } from './ipc-client.js'
 

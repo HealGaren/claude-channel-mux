@@ -77,6 +77,8 @@ const command = process.argv[2]
 
 switch (command) {
   case 'start': {
+    const verbose = process.argv.includes('--verbose') || process.argv.includes('-v')
+
     const pid = readPid()
     if (pid && isProcessAlive(pid)) {
       console.log(`channel-mux daemon already running (pid ${pid})`)
@@ -102,7 +104,10 @@ switch (command) {
     const child = spawn(runner, runnerArgs, {
       stdio: ['ignore', 'ignore', logFd],
       detached: true,
-      env: { ...process.env },
+      env: {
+        ...process.env,
+        ...(verbose ? { CHANNEL_MUX_DEBUG: '1' } : {}),
+      },
     })
     child.unref()
     closeSync(logFd)
@@ -114,6 +119,7 @@ switch (command) {
     if (newPid && isProcessAlive(newPid)) {
       console.log(`channel-mux daemon started (pid ${newPid})`)
       console.log(`  log: ${logPath}`)
+      if (verbose) console.log('  verbose logging enabled')
     } else {
       console.error('channel-mux: daemon failed to start. Check daemon.log')
       process.exit(1)
@@ -172,6 +178,6 @@ switch (command) {
   }
 
   default:
-    console.log('Usage: channel-mux <start|stop|status>')
+    console.log('Usage: channel-mux <start|stop|status> [--verbose|-v]')
     process.exit(1)
 }

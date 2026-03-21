@@ -1,6 +1,9 @@
 import { randomUUID } from 'node:crypto'
 import net from 'node:net'
+import { createDebug } from './debug.js'
 import type { DaemonMessage, InboundMsg, RegisterAckMsg, ToolResultMsg } from './types.js'
+
+const dbg = createDebug('mux:ipc-client')
 
 export const DEFAULT_REQUEST_TIMEOUT_MS = 30_000
 
@@ -28,6 +31,7 @@ export class IpcClient {
     return new Promise((resolve, reject) => {
       const socket = net.createConnection(this.sockPath, () => {
         this.socket = socket
+        dbg('connected', this.sockPath)
         resolve()
       })
 
@@ -125,12 +129,15 @@ export class IpcClient {
 
     // Inbound message from Discord
     if (msg.type === 'inbound' && this.messageHandler) {
-      this.messageHandler(msg)
+      const inbound = msg as InboundMsg
+      dbg('inbound', `channel=${inbound.channelId}`, `message=${inbound.messageId}`)
+      this.messageHandler(msg as InboundMsg)
       return
     }
 
     // Daemon shutdown
     if (msg.type === 'shutdown' && this.shutdownHandler) {
+      dbg('shutdown received')
       this.shutdownHandler()
       return
     }

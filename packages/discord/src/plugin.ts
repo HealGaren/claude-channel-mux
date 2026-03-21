@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { randomUUID } from 'node:crypto'
 import { createRequire } from 'node:module'
-import { IpcClient, SOCK_PATH } from '@claude-channel-mux/core'
+import { createDebug, IpcClient, SOCK_PATH } from '@claude-channel-mux/core'
 
 const require = createRequire(import.meta.url)
 const { version } = require('../package.json') as { version: string }
@@ -9,6 +9,8 @@ const { version } = require('../package.json') as { version: string }
 import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
+
+const dbg = createDebug('mux:plugin')
 
 const sessionId = randomUUID()
 
@@ -129,6 +131,7 @@ mcp.setRequestHandler(ListToolsRequestSchema, async () => ({
 }))
 
 mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
+  dbg('tool_call', req.params.name)
   const args = (req.params.arguments ?? {}) as Record<string, unknown>
   try {
     const result = await ipc.toolCall(sessionId, req.params.name, args)
@@ -149,6 +152,7 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
 })
 
 ipc.onInbound((msg) => {
+  dbg('inbound', `channel=${msg.channelId}`, `message=${msg.messageId}`, `user=${msg.username}`)
   const atts = msg.attachments
   const meta: Record<string, string> = {
     chat_id: msg.channelId,
@@ -163,6 +167,7 @@ ipc.onInbound((msg) => {
       .map((a) => `${a.name} (${a.contentType}, ${Math.round(a.size / 1024)}KB)`)
       .join('; ')
   }
+  dbg('sending mcp notification', msg.messageId)
   void mcp.notification({
     method: 'notifications/claude/channel',
     params: {
