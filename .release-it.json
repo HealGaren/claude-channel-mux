@@ -12,7 +12,7 @@
   },
   "hooks": {
     "before:init": ["pnpm run build", "pnpm run typecheck", "pnpm test"],
-    "after:bump": "npx tsx scripts/sync-versions.ts"
+    "after:bump": "npx tsx scripts/sync-versions.ts && pnpm run format"
   },
   "plugins": {
     "@release-it/conventional-changelog": {

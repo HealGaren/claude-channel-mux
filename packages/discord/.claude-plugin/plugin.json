@@ -5,9 +5,7 @@
   "mcpServers": {
     "channel-mux": {
       "command": "node",
-      "args": [
-        "${CLAUDE_PLUGIN_ROOT}/dist/plugin.mjs"
-      ],
+      "args": ["${CLAUDE_PLUGIN_ROOT}/dist/plugin.mjs"],
       "env": {
         "CHANNEL_MUX_HANDLE_DMS": "true"
       }
