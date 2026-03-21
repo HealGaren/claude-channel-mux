@@ -33,9 +33,13 @@ async function main() {
   const adapter = new DiscordAdapter()
 
   adapter.onMessage((msg) => {
-    dbg('inbound', `channel=${msg.channelId}`, `user=${msg.username}`, `isDM=${msg.isDM}`)
     const routed = ipc.routeInbound(msg)
-    dbg(routed ? 'routed' : 'no matching session')
+    dbg(
+      routed ? 'routed' : 'dropped (no matching session)',
+      `channel=${msg.channelId}`,
+      `user=${msg.username}`,
+      `isDM=${msg.isDM}`,
+    )
   })
 
   ipc.onToolCall(async (tool, args) => {

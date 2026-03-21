@@ -178,6 +178,11 @@ switch (command) {
   }
 
   default:
-    console.log('Usage: channel-mux <start [--verbose|-v]|stop|status>')
+    console.log('Usage: channel-mux <start|stop|status>')
+    console.log('')
+    console.log('Commands:')
+    console.log('  start [--verbose]   Start the daemon (--verbose enables debug logs)')
+    console.log('  stop                Stop the daemon')
+    console.log('  status              Show daemon status')
     process.exit(1)
 }

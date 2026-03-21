@@ -152,7 +152,6 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
 })
 
 ipc.onInbound((msg) => {
-  dbg('inbound', `channel=${msg.channelId}`, `message=${msg.messageId}`, `user=${msg.username}`)
   const atts = msg.attachments
   const meta: Record<string, string> = {
     chat_id: msg.channelId,
@@ -167,7 +166,7 @@ ipc.onInbound((msg) => {
       .map((a) => `${a.name} (${a.contentType}, ${Math.round(a.size / 1024)}KB)`)
       .join('; ')
   }
-  dbg('sending mcp notification', msg.messageId)
+  dbg('notify', `channel=${msg.channelId}`, `message=${msg.messageId}`, `user=${msg.username}`)
   void mcp.notification({
     method: 'notifications/claude/channel',
     params: {

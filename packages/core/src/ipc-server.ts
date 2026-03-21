@@ -65,19 +65,20 @@ export class IpcServer {
       sessionId = this.channelToSession.get(msg.channelId)
     }
 
-    dbg(
-      'routeInbound',
-      `channel=${msg.channelId}`,
-      `isDM=${msg.isDM}`,
-      `session=${sessionId ?? 'none'}`,
-      `registered=[${[...this.channelToSession.keys()].join(',')}]`,
-    )
-
-    if (!sessionId) return false
+    if (!sessionId) {
+      dbg(
+        'routeInbound miss',
+        `channel=${msg.channelId}`,
+        `isDM=${msg.isDM}`,
+        `registered=[${[...this.channelToSession.keys()].join(', ')}]`,
+      )
+      return false
+    }
 
     const session = this.sessions.get(sessionId)
     if (!session) return false
 
+    dbg('routeInbound hit', `channel=${msg.channelId}`, `-> session ${sessionId}`)
     this.send(session.socket, msg)
     return true
   }
