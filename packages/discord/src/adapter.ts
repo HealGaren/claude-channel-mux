@@ -309,6 +309,6 @@ export class DiscordAdapter implements PlatformAdapter {
       if (key in access.groups) return ch
     }
 
-    throw new Error(`channel ${id} is not allowlisted — add via /channel-mux:daemon`)
+    throw new Error(`channel ${id} is not allowlisted -- add via /channel-mux:daemon`)
   }
 }

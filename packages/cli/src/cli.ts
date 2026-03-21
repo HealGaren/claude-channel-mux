@@ -194,15 +194,16 @@ switch (command) {
     switch (sub) {
       case 'add': {
         if (channelIds.length === 0) {
-          console.error('Usage: channel-mux group add <channelId> [channelId2 ...]')
+          console.error('Usage: channel-mux group add <channelId> [channelId2 ...] [--no-mention]')
           process.exit(1)
         }
+        const noMention = process.argv.includes('--no-mention')
         mkdirSync(STATE_DIR, { recursive: true })
         const access = readAccessFile()
         const added: string[] = []
         for (const id of channelIds) {
           if (!access.groups[id]) {
-            access.groups[id] = { requireMention: true, allowFrom: [] }
+            access.groups[id] = { requireMention: !noMention, allowFrom: [] }
             added.push(id)
           }
         }
@@ -259,7 +260,7 @@ switch (command) {
         console.log('Usage: channel-mux group <add|rm|list>')
         console.log('')
         console.log('Commands:')
-        console.log('  add <channelId> [...]   Add channels to daemon reception')
+        console.log('  add <channelId> [...]   Add channels to daemon reception [--no-mention]')
         console.log('  rm <channelId> [...]    Remove channels from daemon reception')
         console.log('  list                    List configured channels')
         process.exit(1)
