@@ -183,13 +183,21 @@ graph LR
 
 ### Daemon Lifecycle
 
-Ephemeral files created on startup, cleaned up on shutdown or by `channel-mux stop`.
+Ephemeral files -- created on startup, cleaned up on shutdown or by `channel-mux stop`.
 
-| File | Daemon | CLI |
-|---|---|---|
-| `daemon.pid` | write on start, delete on stop | read for status, delete on cleanup |
-| `daemon.sock` | create on start, close on stop | delete on cleanup |
-| `monitor.port` | write if enabled, delete on stop | read for status, delete on cleanup |
+```mermaid
+graph LR
+    Daemon -->|start / stop| PID[daemon.pid]
+    Daemon -->|start / stop| SOCK[daemon.sock]
+    Daemon -->|start / stop| MON[monitor.port]
+```
+
+```mermaid
+graph LR
+    CLI -->|read status / cleanup| PID[daemon.pid]
+    CLI -->|cleanup| SOCK[daemon.sock]
+    CLI -->|read status / cleanup| MON[monitor.port]
+```
 
 ### Pairing Bridge
 
