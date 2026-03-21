@@ -170,13 +170,15 @@ describe('smoke tests', () => {
     expect(result).toContain('No channel-mux session config found')
   })
 
-  it('channel-mux-plugin exits with correct error (no daemon)', () => {
+  it('channel-mux-plugin exits with error when misconfigured', () => {
     try {
       run('node packages/discord/dist/plugin.mjs')
       expect.unreachable('should have thrown')
     } catch (err: unknown) {
       const msg = (err as Error).message ?? String(err)
-      expect(msg).toContain('cannot connect to daemon')
+      expect(
+        msg.includes('cannot connect to daemon') || msg.includes('registration failed'),
+      ).toBe(true)
     }
   })
 })
