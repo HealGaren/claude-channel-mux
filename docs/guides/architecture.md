@@ -93,21 +93,18 @@ sequenceDiagram
 sequenceDiagram
     participant C as Claude Code
     participant P as Plugin
-    participant IPC as IPC Server
-    participant Daemon as Daemon
+    participant Daemon as Daemon (IPC Server)
     participant A as Adapter
     participant D as Discord
 
     C->>P: call tool (reply/react/edit/fetch/download)
-    P->>IPC: tool_call { id, tool, args }
-    IPC->>Daemon: toolCallHandler(tool, args)
+    P->>Daemon: tool_call { id, tool, args }
     Daemon->>A: adapter.reply(args)
     A->>A: chunk text, load files
     A->>D: channel.send()
     D-->>A: sent message
     A-->>Daemon: { sentIds }
-    Daemon-->>IPC: tool_result { id, ok, sentIds }
-    IPC-->>P: response via socket
+    Daemon-->>P: tool_result { id, ok, sentIds }
     P-->>C: tool result
 ```
 
@@ -138,28 +135,33 @@ Session claims are exclusive: one session per channel, one session for DMs. Re-r
 
 ## Access Control (Gate)
 
+Gate logic is pure (no platform deps) in `core/gate.ts`. The Discord adapter resolves mentions and reads `access.json` before delegating to the pure function.
+
+**DM messages:**
+
 ```mermaid
-flowchart TD
-    Start([Message arrives]) --> IsDM{DM?}
-
-    IsDM -->|Yes| DmPolicy{dmPolicy}
-    DmPolicy -->|disabled| Drop([Drop])
-    DmPolicy -->|allowlist / pairing| InAllowFrom{sender in allowFrom?}
-    InAllowFrom -->|Yes| Deliver([Deliver])
-    InAllowFrom -->|No| IsAllowlist{dmPolicy = allowlist?}
-    IsAllowlist -->|Yes| Drop
-    IsAllowlist -->|No| Pair([Pair: send code])
-
-    IsDM -->|No| HasPolicy{group policy exists?}
-    HasPolicy -->|No| Drop
-    HasPolicy -->|Yes| CheckAllow{allowFrom filter?}
-    CheckAllow -->|not in list| Drop
-    CheckAllow -->|pass| NeedMention{requireMention?}
-    NeedMention -->|Yes, not mentioned| Drop
-    NeedMention -->|No / mentioned| Deliver
+flowchart LR
+    DM([DM arrives]) --> Policy{dmPolicy?}
+    Policy -->|disabled| Drop([Drop])
+    Policy -->|allowlist / pairing| Allow{sender in allowFrom?}
+    Allow -->|Yes| Deliver([Deliver])
+    Allow -->|No| Mode{dmPolicy?}
+    Mode -->|allowlist| Drop
+    Mode -->|pairing| Pair([Pair: send code])
 ```
 
-Gate logic is pure (no platform deps) in `core/gate.ts`. The Discord adapter resolves mentions and reads `access.json` before delegating to the pure function.
+**Guild messages:**
+
+```mermaid
+flowchart LR
+    Msg([Guild message]) --> Policy{group policy exists?}
+    Policy -->|No| Drop([Drop])
+    Policy -->|Yes| Allow{sender in allowFrom?}
+    Allow -->|not in list| Drop
+    Allow -->|pass| Mention{requireMention?}
+    Mention -->|Yes, not mentioned| Drop
+    Mention -->|No / mentioned| Deliver([Deliver])
+```
 
 ## State Directory
 
@@ -183,18 +185,14 @@ JSON Lines (newline-delimited JSON) over Unix domain socket.
 
 ```mermaid
 graph LR
-    subgraph "Plugin to Daemon"
-        R[register]
-        T[tool_call]
-        U[unregister]
-        PI[ping]
+    subgraph "Request / Response"
+        R[register] -->|ack| RA[register_ack]
+        T[tool_call] -->|result| TR[tool_result]
+        PI[ping] --> PO[pong]
     end
 
-    subgraph "Daemon to Plugin"
-        RA[register_ack]
+    subgraph "Daemon Push"
         I[inbound]
-        TR[tool_result]
-        PO[pong]
         S[shutdown]
     end
 ```
