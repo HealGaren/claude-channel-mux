@@ -271,13 +271,58 @@ switch (command) {
     break
   }
 
+  case 'session': {
+    const homePath = join(STATE_DIR, '..', '..')
+    const mcpPaths = [
+      { scope: 'local', path: join(process.cwd(), '.claude', '.mcp.json') },
+      { scope: 'project', path: join(process.cwd(), '.mcp.json') },
+      { scope: 'user', path: join(homePath, '.mcp.json') },
+    ]
+
+    // Show environment variables (highest priority)
+    const envChannels = process.env.CHANNEL_MUX_CHANNELS
+    const envDms = process.env.CHANNEL_MUX_HANDLE_DMS
+    if (envChannels || envDms) {
+      console.log('env:')
+      if (envChannels) console.log(`  channels: ${envChannels}`)
+      if (envDms) console.log(`  DMs: ${envDms}`)
+    }
+
+    // Show .mcp.json configs
+    let found = !!(envChannels || envDms)
+    for (const { scope, path } of mcpPaths) {
+      try {
+        const raw = JSON.parse(readFileSync(path, 'utf8'))
+        const env = raw?.mcpServers?.['channel-mux']?.env
+        if (!env) continue
+        found = true
+        const channels = env.CHANNEL_MUX_CHANNELS || '(not set)'
+        const dms = env.CHANNEL_MUX_HANDLE_DMS || '(not set)'
+        console.log(`${scope} (${path}):`)
+        console.log(`  channels: ${channels}`)
+        console.log(`  DMs: ${dms}`)
+      } catch {
+        // file doesn't exist or invalid JSON
+      }
+    }
+    if (!found) {
+      console.log('No channel-mux session config found')
+      console.log('Checked env vars and:')
+      for (const { scope, path } of mcpPaths) {
+        console.log(`  ${scope}: ${path}`)
+      }
+    }
+    break
+  }
+
   default:
-    console.log('Usage: channel-mux <start|stop|status|group>')
+    console.log('Usage: channel-mux <start|stop|status|group|session>')
     console.log('')
     console.log('Commands:')
     console.log('  start [--verbose]   Start the daemon (--verbose enables debug logs)')
     console.log('  stop                Stop the daemon')
     console.log('  status              Show daemon status')
     console.log('  group <sub>         Manage daemon channel reception')
+    console.log('  session             Show session routing config')
     process.exit(1)
 }
