@@ -1,0 +1,19 @@
+{
+  "name": "claude-channel-mux",
+  "owner": {
+    "name": "HealGaren"
+  },
+  "metadata": {
+    "description": "Multiplex Claude Code channel sessions through a single Discord bot"
+  },
+  "plugins": [
+    {
+      "name": "channel-mux",
+      "source": {
+        "source": "npm",
+        "package": "@claude-channel-mux/discord"
+      },
+      "description": "Discord channel multiplexer for Claude Code -- routes messages from a shared bot to multiple sessions"
+    }
+  ]
+}

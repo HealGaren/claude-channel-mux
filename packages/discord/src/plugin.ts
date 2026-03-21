@@ -1,6 +1,11 @@
 #!/usr/bin/env node
 import { randomUUID } from 'node:crypto'
+import { createRequire } from 'node:module'
 import { IpcClient, SOCK_PATH } from '@claude-channel-mux/core'
+
+const require = createRequire(import.meta.url)
+const { version } = require('../package.json') as { version: string }
+
 import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
@@ -31,9 +36,9 @@ if (!ack.ok) {
 const _botUsername = ack.botUsername ?? 'channel-mux-bot'
 
 const mcp = new Server(
-  { name: 'channel-mux', version: '0.1.0' },
+  { name: 'channel-mux', version },
   {
-    capabilities: { tools: {} },
+    capabilities: { experimental: { 'claude/channel': {} }, tools: {} },
     instructions: [
       'The sender reads Discord, not this session. Anything you want them to see must go through the reply tool — your transcript output never reaches their chat.',
       '',
