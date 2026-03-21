@@ -105,7 +105,7 @@ channel-mux status
 
 ### 4. Connect Claude Code
 
-Add to your `.mcp.json` (project-level or `~/.claude/.mcp.json`). See the [MCP Configuration Guide](docs/guides/mcp-config.md) for details.
+Add to your `.mcp.json` (project-level or `~/.claude/.mcp.json`). See the [Plugin Installation Guide](docs/guides/plugin-install.md) for all options (dev mode, npm, marketplace) or the [MCP Configuration Guide](docs/guides/mcp-config.md) for details.
 
 ```json
 {
