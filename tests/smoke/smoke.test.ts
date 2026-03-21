@@ -60,12 +60,13 @@ describe('smoke tests', () => {
     expect(distFiles.some((f) => f.includes('index.d.mts'))).toBe(true)
   })
 
-  it('discord tarball contains dist/, skills/, .claude-plugin/', () => {
+  it('discord tarball contains dist/, skills/, .claude-plugin/, .mcp.json', () => {
     const pkgRoot = extractTarball('discord')
     const contents = readdirSync(pkgRoot)
     expect(contents).toContain('dist')
     expect(contents).toContain('skills')
     expect(contents).toContain('.claude-plugin')
+    expect(contents).toContain('.mcp.json')
   })
 
   it('cli tarball contains dist/ with cli.mjs', () => {

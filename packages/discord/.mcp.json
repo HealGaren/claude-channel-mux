@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "channel-mux": {
+      "command": "node",
+      "args": ["dist/plugin.mjs"]
+    }
+  }
+}
