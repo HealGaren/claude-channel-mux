@@ -1,5 +1,5 @@
 import { execSync } from 'node:child_process'
-import { existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -153,6 +153,48 @@ describe('smoke tests', () => {
       )
       expect(result).toContain('local')
       expect(result).toContain('999')
+    })
+
+    it('session channels writes .mcp.json', () => {
+      const fakeProject = join(TMP, `fake-project-write-${testIndex}`)
+      mkdirSync(join(fakeProject, '.claude'), { recursive: true })
+      const cliCmd = `HOME=${fakeHome} node ${join(ROOT, 'packages/cli/dist/cli.mjs')}`
+
+      const result = run(`cd ${fakeProject} && ${cliCmd} session channels 111 222 --scope=local`)
+      expect(result).toContain('CHANNEL_MUX_CHANNELS=111,222')
+      expect(result).toContain('local')
+
+      const written = JSON.parse(readFileSync(join(fakeProject, '.claude', '.mcp.json'), 'utf8'))
+      expect(written.mcpServers['channel-mux'].env.CHANNEL_MUX_CHANNELS).toBe('111,222')
+    })
+
+    it('session dms writes .mcp.json', () => {
+      const fakeProject = join(TMP, `fake-project-dms-${testIndex}`)
+      mkdirSync(fakeProject, { recursive: true })
+      const cliCmd = `HOME=${fakeHome} node ${join(ROOT, 'packages/cli/dist/cli.mjs')}`
+
+      const result = run(`cd ${fakeProject} && ${cliCmd} session dms true --scope=project`)
+      expect(result).toContain('CHANNEL_MUX_HANDLE_DMS=true')
+      expect(result).toContain('project')
+
+      const written = JSON.parse(readFileSync(join(fakeProject, '.mcp.json'), 'utf8'))
+      expect(written.mcpServers['channel-mux'].env.CHANNEL_MUX_HANDLE_DMS).toBe('true')
+    })
+
+    it('session channels preserves existing .mcp.json content', () => {
+      const fakeProject = join(TMP, `fake-project-preserve-${testIndex}`)
+      mkdirSync(join(fakeProject, '.claude'), { recursive: true })
+      writeFileSync(
+        join(fakeProject, '.claude', '.mcp.json'),
+        JSON.stringify({ mcpServers: { other: { command: 'foo' } } }),
+      )
+      const cliCmd = `HOME=${fakeHome} node ${join(ROOT, 'packages/cli/dist/cli.mjs')}`
+
+      run(`cd ${fakeProject} && ${cliCmd} session channels 555 --scope=local`)
+
+      const written = JSON.parse(readFileSync(join(fakeProject, '.claude', '.mcp.json'), 'utf8'))
+      expect(written.mcpServers.other.command).toBe('foo')
+      expect(written.mcpServers['channel-mux'].env.CHANNEL_MUX_CHANNELS).toBe('555')
     })
 
     it('session shows no config when empty', () => {

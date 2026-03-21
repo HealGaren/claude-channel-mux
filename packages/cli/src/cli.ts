@@ -1,6 +1,14 @@
 #!/usr/bin/env node
 import { execSync, spawn } from 'node:child_process'
-import { closeSync, existsSync, mkdirSync, openSync, readFileSync, unlinkSync } from 'node:fs'
+import {
+  closeSync,
+  existsSync,
+  mkdirSync,
+  openSync,
+  readFileSync,
+  unlinkSync,
+  writeFileSync,
+} from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { MONITOR_PORT_FILE, PID_FILE, SOCK_PATH, STATE_DIR } from '@claude-channel-mux/core'
@@ -292,43 +300,99 @@ switch (command) {
   }
 
   case 'session': {
-    const mcpPaths = [
-      { scope: 'local', path: join(process.cwd(), '.claude', '.mcp.json') },
-      { scope: 'project', path: join(process.cwd(), '.mcp.json') },
-      { scope: 'user', path: join(homedir(), '.claude', '.mcp.json') },
-    ]
-
-    // Show environment variables (highest priority)
-    const envChannels = process.env.CHANNEL_MUX_CHANNELS
-    const envDms = process.env.CHANNEL_MUX_HANDLE_DMS
-    if (envChannels || envDms) {
-      console.log('env:')
-      if (envChannels) console.log(`  channels: ${envChannels}`)
-      if (envDms) console.log(`  DMs: ${envDms}`)
+    const sessionSub = process.argv[3]
+    const sessionArgs = process.argv.slice(4)
+    const scopeFlag = sessionArgs.find((a) => a.startsWith('--scope='))
+    const scope = scopeFlag ? scopeFlag.slice('--scope='.length) : 'local'
+    const scopePaths: Record<string, string> = {
+      local: join(process.cwd(), '.claude', '.mcp.json'),
+      project: join(process.cwd(), '.mcp.json'),
+      user: join(homedir(), '.claude', '.mcp.json'),
     }
 
-    // Show .mcp.json configs
-    let found = !!(envChannels || envDms)
-    for (const { scope, path } of mcpPaths) {
-      try {
-        const raw = JSON.parse(readFileSync(path, 'utf8'))
-        const env = raw?.mcpServers?.['channel-mux']?.env
-        if (!env) continue
-        found = true
-        const channels = env.CHANNEL_MUX_CHANNELS || '(not set)'
-        const dms = env.CHANNEL_MUX_HANDLE_DMS || '(not set)'
-        console.log(`${scope} (${path}):`)
-        console.log(`  channels: ${channels}`)
-        console.log(`  DMs: ${dms}`)
-      } catch {
-        // file doesn't exist or invalid JSON
+    function writeMcpEnv(key: string, value: string): void {
+      const targetPath = scopePaths[scope]
+      if (!targetPath) {
+        console.error(`Invalid scope: ${scope}. Use local, project, or user.`)
+        process.exit(1)
       }
+      let raw: Record<string, unknown> = {}
+      try {
+        raw = JSON.parse(readFileSync(targetPath, 'utf8'))
+      } catch {
+        // file doesn't exist or invalid JSON, start fresh
+      }
+      const servers = (raw.mcpServers ?? {}) as Record<string, unknown>
+      const mux = (servers['channel-mux'] ?? {}) as Record<string, unknown>
+      const env = (mux.env ?? {}) as Record<string, string>
+      env[key] = value
+      mux.env = env
+      servers['channel-mux'] = mux
+      raw.mcpServers = servers
+      const dir = join(targetPath, '..')
+      mkdirSync(dir, { recursive: true })
+      writeFileSync(targetPath, `${JSON.stringify(raw, null, 2)}\n`)
+      console.log(`Set ${key}=${value} in ${scope} (${targetPath})`)
+      console.log('Restart Claude Code for changes to take effect.')
     }
-    if (!found) {
-      console.log('No channel-mux session config found')
-      console.log('Checked env vars and:')
-      for (const { scope, path } of mcpPaths) {
-        console.log(`  ${scope}: ${path}`)
+
+    switch (sessionSub) {
+      case 'channels': {
+        const channelIds = sessionArgs.filter((a) => !a.startsWith('-'))
+        if (channelIds.length === 0) {
+          console.error('Usage: channel-mux session channels <id> [id2 ...] [--scope=local|project|user]')
+          process.exit(1)
+        }
+        writeMcpEnv('CHANNEL_MUX_CHANNELS', channelIds.join(','))
+        break
+      }
+
+      case 'dms': {
+        const value = sessionArgs.find((a) => !a.startsWith('-'))
+        if (!value || (value !== 'true' && value !== 'false')) {
+          console.error('Usage: channel-mux session dms <true|false> [--scope=local|project|user]')
+          process.exit(1)
+        }
+        writeMcpEnv('CHANNEL_MUX_HANDLE_DMS', value)
+        break
+      }
+
+      default: {
+        // No subcommand or unrecognized: show current config
+        const allPaths = Object.entries(scopePaths)
+
+        const envChannels = process.env.CHANNEL_MUX_CHANNELS
+        const envDms = process.env.CHANNEL_MUX_HANDLE_DMS
+        if (envChannels || envDms) {
+          console.log('env:')
+          if (envChannels) console.log(`  channels: ${envChannels}`)
+          if (envDms) console.log(`  DMs: ${envDms}`)
+        }
+
+        let found = !!(envChannels || envDms)
+        for (const [name, path] of allPaths) {
+          try {
+            const raw = JSON.parse(readFileSync(path, 'utf8'))
+            const env = raw?.mcpServers?.['channel-mux']?.env
+            if (!env) continue
+            found = true
+            const channels = env.CHANNEL_MUX_CHANNELS || '(not set)'
+            const dms = env.CHANNEL_MUX_HANDLE_DMS || '(not set)'
+            console.log(`${name} (${path}):`)
+            console.log(`  channels: ${channels}`)
+            console.log(`  DMs: ${dms}`)
+          } catch {
+            // file doesn't exist or invalid JSON
+          }
+        }
+        if (!found) {
+          console.log('No channel-mux session config found')
+          console.log('Checked env vars and:')
+          for (const [name, path] of allPaths) {
+            console.log(`  ${name}: ${path}`)
+          }
+        }
+        break
       }
     }
     break
@@ -338,7 +402,9 @@ switch (command) {
     console.log('Usage: channel-mux <daemon|session>')
     console.log('')
     console.log('Commands:')
-    console.log('  daemon <sub>   Manage the daemon (start, stop, status, group)')
-    console.log('  session        Show session routing config')
+    console.log('  daemon <sub>       Manage the daemon (start, stop, status, group)')
+    console.log('  session            Show session routing config')
+    console.log('  session channels   Set session channel IDs')
+    console.log('  session dms        Set session DM handling')
     process.exit(1)
 }
