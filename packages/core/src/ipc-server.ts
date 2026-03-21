@@ -66,7 +66,7 @@ export class IpcServer {
     this.toolCallHandler = handler
   }
 
-  routeInbound(msg: InboundMsg): boolean {
+  routeInbound(msg: InboundMsg): string | null {
     let sessionId: string | undefined
 
     if (msg.isDM) {
@@ -82,15 +82,15 @@ export class IpcServer {
         `isDM=${msg.isDM}`,
         `registered=[${[...this.channelToSession.keys()].join(', ')}]`,
       )
-      return false
+      return null
     }
 
     const session = this.sessions.get(sessionId)
-    if (!session) return false
+    if (!session) return null
 
     dbg('routeInbound hit', `channel=${msg.channelId}`, `-> session ${sessionId}`)
     this.send(session.socket, msg)
-    return true
+    return sessionId
   }
 
   broadcastShutdown(): void {

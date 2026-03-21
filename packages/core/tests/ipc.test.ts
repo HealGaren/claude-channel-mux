@@ -93,7 +93,7 @@ describe('IPC server/client', () => {
     }
 
     const routed = server.routeInbound(msg)
-    expect(routed).toBe(true)
+    expect(routed).toBe('session-1')
 
     // Wait for message to arrive
     await new Promise((r) => setTimeout(r, 50))
@@ -122,7 +122,7 @@ describe('IPC server/client', () => {
       isDM: true,
     }
 
-    expect(server.routeInbound(msg)).toBe(true)
+    expect(server.routeInbound(msg)).toBe('session-dm')
     await new Promise((r) => setTimeout(r, 50))
     expect(received).toHaveLength(1)
     expect(received[0].content).toBe('dm hello')
@@ -142,7 +142,7 @@ describe('IPC server/client', () => {
       attachments: [],
       isDM: false,
     }
-    expect(server.routeInbound(msg)).toBe(false)
+    expect(server.routeInbound(msg)).toBeNull()
   })
 
   it('releases claims on disconnect', async () => {

@@ -57,15 +57,16 @@ async function main() {
   }
 
   adapter.onMessage((msg) => {
-    const routed = ipc.routeInbound(msg)
+    const sessionId = ipc.routeInbound(msg)
     monitor?.recordInbound({
       channelId: msg.channelId,
       username: msg.username,
       content: msg.content,
+      sessionId: sessionId ?? undefined,
     })
     if (dbg.enabled) {
       dbg(
-        routed ? 'routed' : 'dropped (no matching session)',
+        sessionId ? 'routed' : 'dropped (no matching session)',
         `channel=${msg.channelId}`,
         `user=${msg.username}`,
         `isDM=${msg.isDM}`,
