@@ -165,57 +165,49 @@ flowchart LR
 
 ## State Directory
 
-All runtime state lives in `~/.claude/channels/channel-mux/`:
+All runtime state lives in `~/.claude/channels/channel-mux/`.
 
-```
-~/.claude/channels/channel-mux/
-  .env              Bot token (DISCORD_BOT_TOKEN)
-  access.json       Access control config
-  daemon.pid        Running daemon PID
-  daemon.sock       Unix domain socket
-  daemon.log        Daemon stderr output
-  monitor.port      Monitor server port (if enabled)
-  inbox/            Downloaded attachments
-  approved/         Pairing approval files
-```
+### User Config
 
 ```mermaid
 graph LR
-    subgraph Components
-        D[Daemon]
-        A[Adapter]
-        G[Gate]
-        CLI[CLI]
-        Skill[Access Skill]
-    end
-
-    subgraph State Files
-        ENV[.env]
-        ACC[access.json]
-        PID[daemon.pid]
-        SOCK[daemon.sock]
-        MON[monitor.port]
-        INB[inbox/]
-        APR[approved/]
-    end
-
-    D -->|read| ENV
-    D -->|write/delete| PID
-    D -->|write/delete| SOCK
-    D -->|write/delete| MON
-    G -->|read| ACC
-    A -->|write| INB
-    A -->|read/delete| APR
-    Skill -->|read/write| ACC
-    Skill -->|write| APR
-    CLI -->|read/delete| PID
-    CLI -->|delete| SOCK
-    CLI -->|read/delete| MON
+    ENV[.env] -->|read on startup| Daemon
+    ACC[access.json] -->|read per message| Gate
+    ACC -->|read/write| Skill[Access Skill]
 ```
 
-- **`.env`** and **`access.json`** are the only user-facing config files
-- **`approved/`** bridges the terminal skill and the daemon: the skill writes approval files, the daemon's adapter polls and consumes them
-- **`daemon.pid`**, **`daemon.sock`**, **`monitor.port`** are ephemeral process state, cleaned up on shutdown or by CLI
+| File | Description |
+|---|---|
+| `.env` | Bot token (`DISCORD_BOT_TOKEN`), monitor port, etc. |
+| `access.json` | Access control: DM policy, channel groups, allowlists |
+
+### Daemon Lifecycle
+
+```mermaid
+graph LR
+    Daemon -->|write on start| PID[daemon.pid]
+    Daemon -->|create on start| SOCK[daemon.sock]
+    Daemon -->|write if enabled| MON[monitor.port]
+    CLI -->|read / cleanup| PID
+    CLI -->|cleanup| SOCK
+    CLI -->|read / cleanup| MON
+```
+
+These are ephemeral -- created on startup, cleaned up on shutdown or by `channel-mux stop`.
+
+### Pairing Bridge
+
+```mermaid
+graph LR
+    Skill[Access Skill] -->|write approval| APR[approved/]
+    Adapter -->|poll & consume| APR
+```
+
+The `approved/` directory bridges the terminal skill and the daemon. The skill writes a file per approved user; the adapter polls and deletes it after sending confirmation.
+
+### Attachments
+
+The `inbox/` directory stores files downloaded via `download_attachment` tool. Written by the adapter, read by Claude Code sessions.
 
 ## IPC Protocol
 
