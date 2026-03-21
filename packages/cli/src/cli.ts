@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { execSync, spawn } from 'node:child_process'
 import { closeSync, existsSync, mkdirSync, openSync, readFileSync, unlinkSync } from 'node:fs'
+import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { MONITOR_PORT_FILE, PID_FILE, SOCK_PATH, STATE_DIR } from '@claude-channel-mux/core'
 import { readAccessFile, saveAccess } from '@claude-channel-mux/discord'
@@ -85,7 +86,7 @@ switch (command) {
 
     switch (daemonSub) {
       case 'start': {
-        const verbose = process.argv.includes('--verbose')
+        const verbose = process.argv.slice(3).includes('--verbose')
 
         const pid = readPid()
         if (pid && isProcessAlive(pid)) {
@@ -291,11 +292,10 @@ switch (command) {
   }
 
   case 'session': {
-    const homePath = join(STATE_DIR, '..', '..')
     const mcpPaths = [
       { scope: 'local', path: join(process.cwd(), '.claude', '.mcp.json') },
       { scope: 'project', path: join(process.cwd(), '.mcp.json') },
-      { scope: 'user', path: join(homePath, '.mcp.json') },
+      { scope: 'user', path: join(homedir(), '.claude', '.mcp.json') },
     ]
 
     // Show environment variables (highest priority)
