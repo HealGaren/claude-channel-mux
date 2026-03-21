@@ -10,32 +10,59 @@ How to install and use claude-channel-mux as a Claude Code channel plugin.
 - claude.ai account (Console/API key auth not supported for channels)
 - Discord bot set up (see [Discord Setup Guide](./discord-setup.md))
 - Bot token configured (`~/.claude/channels/channel-mux/.env`)
+- Daemon running (`channel-mux start`)
 
-## Install from npm
+## Install from marketplace (recommended)
+
+The plugin is available through a custom marketplace.
+
+### 1. Add the marketplace and install
+
+In your Claude Code terminal:
+
+```bash
+# Add the marketplace (one-time)
+/plugins marketplace add HealGaren/claude-channel-mux
+
+# Install the plugin
+/plugins install channel-mux@HealGaren/claude-channel-mux
+```
+
+The plugin ships with `.mcp.json`, so the MCP server is configured automatically.
+
+### 2. Start Claude Code with channels enabled
+
+Pass channel configuration as environment variables and start Claude Code:
+
+```bash
+CHANNEL_MUX_CHANNELS=YOUR_CHANNEL_ID CHANNEL_MUX_HANDLE_DMS=true \
+  claude --dangerously-load-development-channels server:channel-mux
+```
+
+> `server:channel-mux` refers to the MCP server name defined in the plugin's `.mcp.json`.
+
+You can also set these variables permanently in `.mcp.json` (project-level or `~/.claude/.mcp.json`) under the `env` block. See the [MCP Configuration Guide](./mcp-config.md) for details.
+
+> **Warning**: The `--dangerously-load-development-channels` flag loads channel plugins that are NOT from the official Anthropic marketplace. Only official Anthropic channels can run without this flag. This flag allows third-party code to inject messages into your Claude session. Do not use it if you do not understand the implications.
+
+### 3. Verify the connection
+
+1. Check daemon logs: `tail -f ~/.claude/channels/channel-mux/daemon.log`
+2. You should see: `channel-mux ipc: session <id> registered`
+3. Send a message in your configured Discord channel or DM the bot
+4. The message should appear in your Claude Code session as a `<channel>` tag
+
+## Install from npm (manual MCP setup)
+
+If you prefer to configure the MCP server manually instead of using the plugin marketplace:
 
 ### 1. Install the package
 
 ```bash
-# npm
 npm install -g @claude-channel-mux/cli
-
-# pnpm
-pnpm add -g @claude-channel-mux/cli
-
-# yarn
-yarn global add @claude-channel-mux/cli
 ```
 
-This also installs `@claude-channel-mux/discord` as a dependency.
-
-### 2. Start the daemon
-
-```bash
-channel-mux start
-channel-mux status   # verify it's running
-```
-
-### 3. Configure .mcp.json
+### 2. Configure .mcp.json
 
 Add to your `.mcp.json` (project-level or `~/.claude/.mcp.json`):
 
@@ -55,49 +82,11 @@ Add to your `.mcp.json` (project-level or `~/.claude/.mcp.json`):
 
 Replace `YOUR_CHANNEL_ID` with your Discord channel ID (see [Discord Setup Guide](./discord-setup.md#7-get-channel-ids)).
 
-### 4. Start Claude Code with channels enabled
-
-The `.mcp.json` alone connects the MCP server and its tools, but **channel messages (push events from Discord) only arrive when you enable channels** with the `--channels` flag.
-
-During the research preview, custom channels need the development flag:
+### 3. Start Claude Code with channels enabled
 
 ```bash
 claude --dangerously-load-development-channels server:channel-mux
 ```
-
-> `server:channel-mux` refers to the server name in your `.mcp.json` (`"channel-mux"`).
-
-Once the project marketplace is set up, this will become:
-
-```bash
-claude --channels plugin:channel-mux@HealGaren/claude-channel-mux
-```
-
-### 5. Verify the connection
-
-1. Check daemon logs: `tail -f ~/.claude/channels/channel-mux/daemon.log`
-2. You should see: `channel-mux ipc: session <id> registered`
-3. Send a message in your configured Discord channel or DM the bot
-4. The message should appear in your Claude Code session as a `<channel>` tag
-
-## Install from marketplace (planned)
-
-A project marketplace will be published so users can install with:
-
-```bash
-# Add the marketplace (one-time)
-/plugin marketplace add HealGaren/claude-channel-mux
-
-# Install the plugin
-/plugin install channel-mux@HealGaren/claude-channel-mux
-
-# Start with channel enabled
-claude --channels plugin:channel-mux@HealGaren/claude-channel-mux
-```
-
-Not available yet. See the [project roadmap](https://github.com/HealGaren/claude-channel-mux/issues/1).
-
-> **Note**: This plugin connects to external services (Discord) and injects external messages into Claude sessions. Due to security considerations, it is distributed through a project marketplace rather than the official Anthropic marketplace.
 
 ## Install from source (for development)
 
