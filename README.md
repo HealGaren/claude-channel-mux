@@ -2,9 +2,12 @@
 
 > Multiplex Claude Code channel sessions through a single Discord bot.
 
+[![npm version](https://img.shields.io/npm/v/@claude-channel-mux/cli)](https://www.npmjs.com/package/@claude-channel-mux/cli)
+[![npm downloads](https://img.shields.io/npm/dm/@claude-channel-mux/cli)](https://www.npmjs.com/package/@claude-channel-mux/cli)
+[![CI](https://github.com/HealGaren/claude-channel-mux/actions/workflows/ci.yml/badge.svg)](https://github.com/HealGaren/claude-channel-mux/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![CI](https://github.com/HealGaren/claude-channel-mux/actions/workflows/ci.yml/badge.svg)](https://github.com/HealGaren/claude-channel-mux/actions/workflows/ci.yml)
+[![Node.js](https://img.shields.io/node/v/@claude-channel-mux/cli)](https://nodejs.org/)
 
 > **Note**: This is a community project and is not affiliated with or endorsed by Anthropic.
 
