@@ -31,3 +31,14 @@ const pluginJson = JSON.parse(readFileSync(pluginJsonPath, 'utf8'))
 pluginJson.version = version
 writeFileSync(pluginJsonPath, `${JSON.stringify(pluginJson, null, 2)}\n`)
 process.stderr.write(`sync-versions: plugin.json -> ${version}\n`)
+
+// Sync marketplace.json plugin version
+const marketplacePath = join(ROOT, '.claude-plugin', 'marketplace.json')
+const marketplace = JSON.parse(readFileSync(marketplacePath, 'utf8'))
+for (const plugin of marketplace.plugins) {
+  if (plugin.source?.source === 'npm') {
+    plugin.source.version = version
+  }
+}
+writeFileSync(marketplacePath, `${JSON.stringify(marketplace, null, 2)}\n`)
+process.stderr.write(`sync-versions: marketplace.json -> ${version}\n`)

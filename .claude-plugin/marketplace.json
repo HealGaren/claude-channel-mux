@@ -11,7 +11,8 @@
       "name": "channel-mux",
       "source": {
         "source": "npm",
-        "package": "@claude-channel-mux/discord"
+        "package": "@claude-channel-mux/discord",
+        "version": "0.1.2"
       },
       "description": "Discord channel multiplexer for Claude Code -- routes messages from a shared bot to multiple sessions"
     }
