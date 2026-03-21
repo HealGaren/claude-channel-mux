@@ -1,7 +1,13 @@
 {
   "name": "channel-mux",
   "version": "0.1.0",
-  "description": "Multiplexed Discord channel for Claude Code — routes messages from a shared bot to multiple sessions.",
-  "entrypoint": "../src/plugin.ts",
-  "runtime": "tsx"
+  "description": "Multiplexed Discord channel for Claude Code -- routes messages from a shared bot to multiple sessions.",
+  "mcpServers": {
+    "channel-mux": {
+      "command": "${CLAUDE_PLUGIN_ROOT}/dist/plugin.mjs",
+      "env": {
+        "CHANNEL_MUX_HANDLE_DMS": "true"
+      }
+    }
+  }
 }
