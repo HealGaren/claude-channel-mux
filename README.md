@@ -98,12 +98,14 @@ Add channels to the daemon and configure session routing:
 # Allow the daemon to receive from your channel
 channel-mux daemon group add YOUR_CHANNEL_ID
 
-# Set which channels this session routes (writes to .mcp.json)
+# Set which channels this session routes (updates .mcp.json env block)
 channel-mux session channels YOUR_CHANNEL_ID
 channel-mux session dms true
 ```
 
 > **Tip**: Get a channel ID by enabling Developer Mode in Discord settings, then right-clicking a channel > "Copy Channel ID". Multiple IDs can be space-separated.
+>
+> **Note**: If you installed via the plugin marketplace (step 5), the plugin provides a default `.mcp.json`. Running `session channels` / `session dms` updates the env block in your local `.mcp.json`, which takes precedence.
 
 ### 7. Start Claude Code with channels enabled
 

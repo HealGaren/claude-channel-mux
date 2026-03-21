@@ -4,7 +4,7 @@ This guide explains how to manually connect claude-channel-mux to Claude Code vi
 
 > **Recommended**: Install via the [plugin marketplace](./plugin-install.md#install-from-marketplace-recommended) instead. The plugin ships with `.mcp.json` pre-configured, so manual setup is not needed. This guide is for cases where you need custom MCP configuration or are installing from source.
 >
-> **Important**: `.mcp.json` alone only enables MCP tools (reply, react, etc.). For channel messages to flow from Discord into your Claude session, you must also start Claude Code with `--dangerously-load-development-channels server:channel-mux`. The plugin marketplace handles this automatically.
+> **Important**: `.mcp.json` alone only enables MCP tools (reply, react, etc.). For channel messages to flow from Discord into your Claude session, you must also start Claude Code with `--dangerously-load-development-channels server:channel-mux`. The plugin marketplace simplifies setup but you still need this flag.
 
 ## Prerequisites
 
