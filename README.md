@@ -191,6 +191,8 @@ Managed via the `/channel-mux:access` skill in your Claude terminal:
 
 ## Architecture
 
+> For detailed diagrams and message flows, see the [Architecture Guide](docs/guides/architecture.md).
+
 ### IPC Protocol
 
 Daemon and plugins communicate via **JSON Lines** over a Unix domain socket.
