@@ -1,10 +1,11 @@
 #!/usr/bin/env node
-import { createRequire } from 'node:module'
 import { randomUUID } from 'node:crypto'
+import { createRequire } from 'node:module'
 import { IpcClient, SOCK_PATH } from '@claude-channel-mux/core'
 
 const require = createRequire(import.meta.url)
 const { version } = require('../package.json') as { version: string }
+
 import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
