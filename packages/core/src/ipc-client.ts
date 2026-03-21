@@ -131,7 +131,7 @@ export class IpcClient {
     if (msg.type === 'inbound' && this.messageHandler) {
       const inbound = msg as InboundMsg
       dbg('inbound', `channel=${inbound.channelId}`, `message=${inbound.messageId}`)
-      this.messageHandler(msg as InboundMsg)
+      this.messageHandler(inbound)
       return
     }
 

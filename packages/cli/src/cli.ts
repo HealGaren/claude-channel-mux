@@ -178,6 +178,6 @@ switch (command) {
   }
 
   default:
-    console.log('Usage: channel-mux <start|stop|status> [--verbose|-v]')
+    console.log('Usage: channel-mux <start [--verbose|-v]|stop|status>')
     process.exit(1)
 }
