@@ -183,28 +183,21 @@ All runtime state lives in `~/.claude/channels/channel-mux/`:
 
 JSON Lines (newline-delimited JSON) over Unix domain socket.
 
-```mermaid
-graph LR
-    subgraph "Request / Response"
-        R[register] -->|ack| RA[register_ack]
-        T[tool_call] -->|result| TR[tool_result]
-        PI[ping] --> PO[pong]
-    end
+**Plugin to Daemon:**
 
-    subgraph "Daemon Push"
-        I[inbound]
-        S[shutdown]
-    end
-```
+| Message | Purpose |
+|---|---|
+| `register` | Claim channels, opt into DMs |
+| `tool_call` | Execute adapter tool (reply, react, etc.) |
+| `unregister` | Release claims |
+| `ping` | Keep-alive |
 
-| Direction | Message | Purpose |
-|---|---|---|
-| Plugin to Daemon | `register` | Claim channels, opt into DMs |
-| Plugin to Daemon | `tool_call` | Execute adapter tool (reply, react, etc.) |
-| Plugin to Daemon | `unregister` | Release claims |
-| Plugin to Daemon | `ping` | Keep-alive |
-| Daemon to Plugin | `register_ack` | Registration result + bot username |
-| Daemon to Plugin | `inbound` | Routed Discord message |
-| Daemon to Plugin | `tool_result` | Tool call response |
-| Daemon to Plugin | `pong` | Keep-alive response |
-| Daemon to Plugin | `shutdown` | Daemon shutting down |
+**Daemon to Plugin:**
+
+| Message | Purpose |
+|---|---|
+| `register_ack` | Registration result + bot username |
+| `tool_result` | Tool call response |
+| `pong` | Keep-alive response |
+| `inbound` | Routed Discord message |
+| `shutdown` | Daemon shutting down |
