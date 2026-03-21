@@ -47,7 +47,7 @@ pnpm workspace monorepo with three packages:
 packages/
   core/       @claude-channel-mux/core      IPC, types, gate, config
   discord/    @claude-channel-mux/discord    Discord adapter, daemon, plugin
-  cli/        @claude-channel-mux/cli        CLI (start/stop/status)
+  cli/        @claude-channel-mux/cli        CLI (daemon, session)
 ```
 
 ### Dependency graph
@@ -73,7 +73,7 @@ core -> (no internal deps)
 - `plugin.ts`: MCP server with 5 tools, IPC-proxied to daemon
 
 ### packages/cli
-- `cli.ts`: start/stop/status commands, daemon process management
+- `cli.ts`: `channel-mux daemon` (start/stop/status/group) and `channel-mux session` (view/channels/dms)
 
 ## Coding Conventions
 
@@ -122,8 +122,8 @@ JSON Lines (newline-delimited JSON) over Unix domain socket at `~/.claude/channe
 ## Key Design Decisions
 
 - **Gate logic separated from adapters**: Core `evaluateGate()` operates on plain data. Discord adapter extracts fields from discord.js Message, resolves mentions, then delegates to core. This enables testing without mocking and reuse across adapters.
-- **Plugin does NOT auto-start daemon**. User must start manually via `channel-mux start`.
+- **Plugin does NOT auto-start daemon**. User must start manually via `channel-mux daemon start`.
 - **One bot token per daemon**. Multi-bot not supported in v1.
 - **Unix socket only**. Windows native not supported (WSL works).
-- **Access mutations only via terminal skill**, never from channel messages (prompt injection defense).
+- **Access mutations only via terminal skill or CLI**, never from channel messages (prompt injection defense).
 - **workspace:* protocol**: pnpm resolves to actual versions at publish time. CI uses `pnpm publish` (not npm) to ensure resolution.

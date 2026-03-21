@@ -13,9 +13,10 @@ npm install -g @claude-channel-mux/cli
 ## Usage
 
 ```bash
-channel-mux start    # Start daemon in background
-channel-mux stop     # Stop daemon (SIGTERM, then SIGKILL)
-channel-mux status   # Check if daemon is running
+channel-mux daemon start    # Start daemon in background
+channel-mux daemon stop     # Stop daemon (SIGTERM, then SIGKILL)
+channel-mux daemon status   # Check if daemon is running
+channel-mux session         # View session routing config
 ```
 
 ## Note

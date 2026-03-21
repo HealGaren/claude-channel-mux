@@ -193,7 +193,7 @@ graph LR
 
 ### Daemon Lifecycle
 
-Ephemeral files -- created on startup, cleaned up on shutdown or by `channel-mux stop`.
+Ephemeral files -- created on startup, cleaned up on shutdown or by `channel-mux daemon stop`.
 
 ```mermaid
 graph LR

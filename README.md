@@ -42,35 +42,7 @@ The official Claude Code Discord plugin spawns a dedicated bot per session. That
 ## Prerequisites
 
 - **Node.js** >= 20
-- **pnpm** (workspace-enabled package manager)
 - A **Discord bot** with Message Content Intent enabled
-
-## Installation
-
-### From source (current)
-
-```bash
-git clone https://github.com/HealGaren/claude-channel-mux.git
-cd claude-channel-mux
-pnpm install
-pnpm run build
-```
-
-This is a pnpm workspace monorepo. `pnpm install` at the root installs all
-workspace packages and links their internal dependencies.
-
-### From npm registry
-
-```bash
-# npm
-npm install -g @claude-channel-mux/cli
-
-# pnpm
-pnpm add -g @claude-channel-mux/cli
-
-# yarn
-yarn global add @claude-channel-mux/cli
-```
 
 ## Quick Start
 
@@ -83,64 +55,67 @@ See the [Discord Setup Guide](docs/guides/discord-setup.md) for detailed instruc
 3. **OAuth2 > URL Generator**: scope `bot`, permissions: Send Messages, Read Message History, Add Reactions, Attach Files
 4. Invite the bot to your server with the generated URL
 
-### 2. Configure
+### 2. Install
 
 ```bash
-mkdir -p ~/.claude/channels/channel-mux
-cat > ~/.claude/channels/channel-mux/.env << 'EOF'
-DISCORD_BOT_TOKEN=your_token_here
-EOF
+npm install -g @claude-channel-mux/cli
 ```
 
-### 3. Start the daemon
+### 3. Configure bot token
 
 ```bash
-# Foreground (see logs directly)
-pnpm run dev
-
-# Or background via CLI
-channel-mux start
-channel-mux status
+echo "DISCORD_BOT_TOKEN=your_token_here" > ~/.claude/channels/channel-mux/.env
 ```
 
-### 4. Connect Claude Code
+> The state directory (`~/.claude/channels/channel-mux/`) is created automatically on first daemon start.
 
-Add to your `.mcp.json` (project-level or `~/.claude/.mcp.json`). See the [Plugin Installation Guide](docs/guides/plugin-install.md) for all options (dev mode, npm, marketplace) or the [MCP Configuration Guide](docs/guides/mcp-config.md) for details.
+### 4. Start the daemon
 
-```json
-{
-  "mcpServers": {
-    "channel-mux": {
-      "command": "channel-mux-plugin",
-      "env": {
-        "CHANNEL_MUX_CHANNELS": "YOUR_CHANNEL_ID",
-        "CHANNEL_MUX_HANDLE_DMS": "true"
-      }
-    }
-  }
-}
+```bash
+channel-mux daemon start
+channel-mux daemon status   # verify it's running
 ```
 
-If running from the monorepo source with tsx:
+### 5. Install the plugin
 
-```json
-{
-  "mcpServers": {
-    "channel-mux": {
-      "command": "npx",
-      "args": ["tsx", "packages/discord/src/plugin.ts"],
-      "env": {
-        "CHANNEL_MUX_CHANNELS": "YOUR_CHANNEL_ID",
-        "CHANNEL_MUX_HANDLE_DMS": "true"
-      }
-    }
-  }
-}
+In a Claude Code session, install the plugin from the custom marketplace:
+
+```bash
+# Add the marketplace (one-time)
+/plugins marketplace add HealGaren/claude-channel-mux
+
+# Install the plugin
+/plugins install channel-mux@HealGaren/claude-channel-mux
 ```
 
-> **Tip**: Get a channel ID by enabling Developer Mode in Discord settings, then right-clicking a channel -> "Copy Channel ID". Separate multiple channels with commas.
+The plugin ships with `.mcp.json`, so the MCP server is configured automatically.
 
-### 5. Start chatting
+### 6. Configure channels
+
+Add channels to the daemon and configure session routing:
+
+```bash
+# Allow the daemon to receive from your channel
+channel-mux daemon group add YOUR_CHANNEL_ID
+
+# Set which channels this session routes (updates .mcp.json env block)
+channel-mux session channels YOUR_CHANNEL_ID
+channel-mux session dms true
+```
+
+> **Tip**: Get a channel ID by enabling Developer Mode in Discord settings, then right-clicking a channel > "Copy Channel ID". Multiple IDs can be space-separated.
+>
+> **Note**: If you installed via the plugin marketplace (step 5), the plugin provides a default `.mcp.json`. Running `session channels` / `session dms` updates the env block in your local `.mcp.json`, which takes precedence.
+
+### 7. Start Claude Code with channels enabled
+
+```bash
+claude --dangerously-load-development-channels server:channel-mux
+```
+
+> **Warning**: The `--dangerously-load-development-channels` flag loads channel plugins that are NOT from the official Anthropic marketplace. Only official Anthropic channels can run without this flag. Do not use this flag if you do not understand what it does -- it allows third-party code to inject messages into your Claude session.
+
+### 8. Start chatting
 
 Send a DM to your bot. It will respond with a pairing code. In your terminal:
 
@@ -153,10 +128,21 @@ You're paired. Messages now flow to your Claude session.
 ## CLI Reference
 
 ```bash
-channel-mux start    # Start daemon in background
-channel-mux stop     # Stop daemon (SIGTERM -> SIGKILL)
-channel-mux status   # Check if daemon is running
+# Daemon management
+channel-mux daemon start [--verbose]   # Start daemon in background
+channel-mux daemon stop                # Stop daemon (SIGTERM -> SIGKILL)
+channel-mux daemon status              # Check if daemon is running
+channel-mux daemon group add <id> ...  # Add channels to daemon reception
+channel-mux daemon group rm <id> ...   # Remove channels
+channel-mux daemon group list          # List configured channels
+
+# Session routing
+channel-mux session                            # View current config
+channel-mux session channels <id> [...]        # Set channel IDs
+channel-mux session dms <true|false>           # Set DM handling
 ```
+
+> `session channels` and `session dms` accept `--scope=local|project|user` to choose which `.mcp.json` to write (default: `local`).
 
 ## Configuration
 
@@ -226,6 +212,25 @@ interface PlatformAdapter {
 - **File path security** -- `assertSendable()` blocks sending state directory files (except inbox)
 - **Attachment sanitization** -- filenames are stripped of injection characters
 
+## Monitoring
+
+The daemon has an optional HTTP monitoring server for observing runtime state. Set `MONITOR_PORT` in your `.env`:
+
+```
+MONITOR_PORT=9100
+```
+
+Endpoints (bound to `127.0.0.1` only):
+
+| Endpoint | Description |
+|---|---|
+| `GET /status` | Daemon uptime, session count, bot username |
+| `GET /sessions` | Connected sessions with claimed channels |
+| `GET /requests` | Recent request log (last 200 entries) |
+| `GET /events` | SSE stream (inbound, tool_call, session connect/disconnect) |
+
+See the [Monitor API Guide](docs/guides/monitor-api.md) for full response schemas.
+
 ## Project Structure
 
 ```
@@ -245,7 +250,7 @@ packages/
       utils.ts           # chunk(), assertSendable(), safeAttName()
   cli/                 @claude-channel-mux/cli
     src/
-      cli.ts             # CLI (start/stop/status)
+      cli.ts             # CLI (daemon, session)
 ```
 
 ## Development
