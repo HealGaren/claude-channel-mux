@@ -90,7 +90,9 @@ describe('smoke tests', () => {
   })
 
   it('channel-mux daemon status command works', () => {
-    const result = run('node packages/cli/dist/cli.mjs daemon status')
+    const fakeHome = join(TMP, 'fake-home-status')
+    mkdirSync(join(fakeHome, '.claude', 'channels', 'channel-mux'), { recursive: true })
+    const result = run(`HOME=${fakeHome} node packages/cli/dist/cli.mjs daemon status`)
     expect(result).toContain('channel-mux daemon')
   })
 
